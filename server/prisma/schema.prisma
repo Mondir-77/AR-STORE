@@ -78,7 +78,7 @@ model Conversation {
   userId    String    @unique
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   messages  Message[]
-  updatedAt DateTime  @updatedAt
+  updatedAt DateTime  @default(now()) @updatedAt
 }
 
 model Message {

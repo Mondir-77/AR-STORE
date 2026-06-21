@@ -5,11 +5,12 @@
   "type": "module",
   "scripts": {
     "postinstall": "prisma generate",
-    "build": "prisma generate && prisma db push",
+    "build": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "node prisma/seed.js",
     "dev": "node src/index.js",
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "start:render": "node scripts/render-start.js"
   },
   "dependencies": {
     "@prisma/client": "^6.3.1",
