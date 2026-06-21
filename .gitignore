@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+server/node_modules/
+
+# Secrets & local DB
+server/.env
+.env
+*.env.local
+
+# SQLite (legacy local)
+server/dev.db
+server/dev.db-journal
+server/prisma/dev.db
+server/prisma/dev.db-journal
+
+# Admin uploads (ephemeral on Render — use Cloudinary later)
+server/uploads/*
+!server/uploads/.gitkeep
+
+# OS & IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.cursor/
+
+# Logs
+*.log
+npm-debug.log*

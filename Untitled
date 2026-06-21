@@ -1,0 +1,2277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AR STORE</title>
+<style>
+/* ========== BASE & RESET ========== */
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  height:100vh;
+  overflow-x:hidden;
+  color:rgb(255, 255, 255);
+  font-family:ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Arial, sans-serif;
+  transition:0.4s;
+}
+
+:root{
+  --lux-black:#08090b;
+  --lux-ink:#0e0f13;
+  --lux-glass:rgb(21, 2, 2);
+  --lux-glass-2:rgba(255,255,255,0.16);
+  --lux-border:rgba(255,255,255,0.18);
+  --lux-border-2:rgba(255,255,255,0.10);
+  --lux-shadow:0 18px 55px rgba(0,0,0,0.55);
+  --lux-shadow-soft:0 10px 35px rgba(0,0,0,0.35);
+  --lux-radius:18px;
+}
+
+/* Luxury feel without changing layout */
+.btn, .modal-btn, .modal-back, .back-btn, .detail-btn, .account-save-btn, .purchase-delete, .help-email, .help-whatsapp, .help-instagram{
+  border-radius:16px;
+}
+.btn, .modal-btn, .back-btn, .detail-btn, .account-save-btn{
+  letter-spacing:0.02em;
+}
+
+/* Glass treatment */
+.topbar,
+.modal,
+.modal-content,
+.card,
+.product-card,
+.product-slider,
+.product-detail-info,
+.purchase-card,
+.account-card,
+.help-card,
+#orderNotification{
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+
+/* ========== WELCOME PAGE (shown after login) ========== */
+#welcomeSection{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:linear-gradient(135deg,#000 0%,#1a1a2e 100%);
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  z-index:1000;
+  opacity:0;
+  animation:welcomeFadeIn 1.2s ease forwards;
+}
+@keyframes welcomeFadeIn{
+  from{opacity:0;}
+  to{opacity:1;}
+}
+#welcomeSection.fadeOut{
+  animation:welcomeFadeOut 0.8s ease forwards;
+}
+@keyframes welcomeFadeOut{
+  from{opacity:1;}
+  to{opacity:0;}
+}
+.welcome-title{
+  font-size:clamp(1.8rem,4vw,2.5rem);
+  font-weight:900;
+  letter-spacing:0.1em;
+  margin-bottom:35px;
+  opacity:0;
+  animation:slideUp 0.8s ease 0.3s forwards;
+}
+.welcome-brand{
+  font-size:clamp(2.2rem,5vw,3.5rem);
+  font-weight:700;
+  letter-spacing:0.15em;
+  opacity:0;
+  animation:slideUp 0.8s ease 0.5s forwards;
+}
+@keyframes slideUp{
+  from{opacity:0;transform:translateY(20px);}
+  to{opacity:1;transform:translateY(0);}
+}
+
+/* ========== LOGIN SECTION ========== */
+#loginSection{
+  background:url("Mondir.jpg") no-repeat center center/cover;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  align-items:center;
+  padding-bottom:160px;
+  gap:30px;
+}
+
+.btn{
+  padding:14px 98px;
+  min-width:300px;
+  text-align:center;
+  border:2px solid rgb(244, 243, 243);
+  background:linear-gradient(180deg, rgba(255, 255, 255, 0.178),  rgba(6, 0, 25, 0.365));
+  color:white;
+  font-weight:780;
+  font-size:25px;
+  cursor:pointer;
+  transition:all 0.3s ease;
+  border-radius:15px;
+  box-shadow:0 10px 30px rgba(0, 0, 0, 0.037);
+  text-shadow:0 2px 10px rgba(0,0,0,0.35);
+}
+.btn:hover{
+  background:linear-gradient(180deg, rgba(0, 0, 0, 0.235), rgba(0, 0, 0, 0.203));
+  transform:translateY(-2px);
+  box-shadow:0 16px 40px rgba(255, 248, 248, 0.45);
+}
+.lang-box{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;}
+
+/* ========== MODAL (Sign In / Create Account) ========== */
+.modal{
+  position:fixed;
+  inset:0;
+  background:radial-gradient(1200px 900px at 50% -10%, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.336));
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:100;
+  backdrop-filter:blur(10px);
+}
+
+.modal-content{
+  background:linear-gradient(180deg, rgba(34, 8, 185, 0.712), rgba(255, 252, 252, 0.68));
+  color:#000000;
+  padding:35px;
+  width:min(380px,92vw);
+  border-radius:20px;
+  text-align:center;
+  box-shadow:var(--lux-shadow);
+  animation:modalSlide 0.3s ease;
+  border:1px solid rgb(0, 0, 0);
+}
+@keyframes modalSlide{
+  from{opacity:0;transform:translateY(-20px);}
+  to{opacity:1;transform:translateY(0);}
+}
+
+.modal-content h2{
+  margin-bottom:25px;
+  font-size:1.5rem;
+  font-weight:800;
+}
+
+.modal-content input{
+  width:100%;
+  padding:14px 16px;
+  margin:10px 0;
+  border:1px solid rgba(0,0,0,0.10);
+  border-radius:10px;
+  font-size:16px;
+  transition:border 0.2s;
+  background:rgb(255, 255, 255);
+}
+.modal-content input:focus{
+  outline:none;
+  border-color:rgba(0,122,255,0.65);
+}
+
+/* Password field with eye icon */
+.password-wrapper{
+  position:relative;
+  width:100%;
+}
+.password-wrapper input{
+  padding-right:50px;
+}
+.password-toggle{
+  position:absolute;
+  right:14px;
+  top:50%;
+  transform:translateY(-50%);
+  background:none;
+  border:none;
+  cursor:pointer;
+  padding:5px;
+  color:#666;
+  font-size:18px;
+  transition:color 0.2s;
+}
+.password-toggle:hover{color:#000;}
+
+.modal-btn{
+  display:block;
+  width:100%;
+  padding:14px;
+  margin-top:12px;
+  background:linear-gradient(180deg, rgba(12,12,14,0.92), rgba(0,0,0,0.92));
+  color:white;
+  cursor:pointer;
+  border-radius:10px;
+  border:none;
+  font-size:18px;
+  font-weight:500;
+  transition:all 0.3s;
+  box-shadow:0 10px 24px rgba(0,0,0,0.25);
+}
+.modal-btn:hover{background:linear-gradient(180deg, rgba(20,20,22,0.95), rgba(2,2,2,0.95));transform:translateY(-1px);}
+.modal-btn.secondary{
+  background:linear-gradient(180deg, rgba(255,255,255,0.20), rgba(255,255,255,0.10));
+  color:#ffffff;
+  border:1px solid rgba(255,255,255,0.22);
+}
+.modal-btn.secondary:hover{background:linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0.14));}
+
+
+/* Back button in modals - fancy blue */
+.modal-back{
+  margin-top:20px;
+  padding:12px 24px;
+  background:linear-gradient(135deg,#007aff,#0051d5);
+  color:rgb(255, 250, 250);
+  border:none;
+  cursor:pointer;
+  border-radius:10px;
+  font-size:15px;
+  font-weight:600;
+  transition:all 0.35s ease;
+  box-shadow:0 4px 15px rgba(0,122,255,0.4);
+}
+.modal-back:hover{
+  background:linear-gradient(135deg,#0066d6,#0047b8);
+  transform:translateY(-2px);
+  box-shadow:0 6px 20px rgba(0,122,255,0.5);
+}
+.modal-back:active{transform:translateY(0);}
+
+/* ========== FOOTER (global) ========== */
+footer{
+    position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  padding:20px 25px;
+  font-size:20px;
+  font-weight:700;
+  color:rgb(255, 255, 255);
+  text-align:center;
+}
+/* ========== STORE SECTION ========== */
+#storeSection{
+  display:none;
+  flex-direction:column;
+  min-height:100vh;
+  padding-bottom:70px;
+  background:url("AR.jpg") no-repeat center center/cover;
+}
+
+.topbar{
+  display:grid;
+  grid-template-columns:1fr minmax(220px, 520px) 1fr;
+  align-items:center;
+  padding:18px 25px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.02)),
+    radial-gradient(900px 120px at 50% 0%, rgba(255,255,255,0.18), rgba(255,255,255,0.00)),
+    rgba(0,0,0,0.58);
+  border-bottom:1px solid rgba(255,255,255,0.12);
+  box-shadow:0 16px 45px rgba(0,0,0,0.45);
+  position:sticky;
+  top:0;
+  z-index:50;
+}
+.topbar::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(120deg, rgba(255,255,255,0.14), rgba(255,255,255,0) 35%, rgba(255,255,255,0.08) 65%, rgba(255,255,255,0));
+  opacity:0.55;
+  mix-blend-mode:screen;
+}
+
+.menu{
+  display:flex;
+  gap:20px;
+  font-weight:800;
+  font-size:16px;
+  flex-wrap:wrap;
+}
+.menu span{
+  cursor:pointer;
+  transition:all 0.3s;
+}
+.menu span:hover{color:#007aff;}
+.menu-item-wrap{
+  position:relative;
+  display:inline-block;
+}
+.purchases-badge{
+  position:absolute;
+  top:-6px;
+  right:-10px;
+  min-width:18px;
+  height:18px;
+  padding:0 5px;
+  background:#dc3545;
+  color:white;
+  font-size:11px;
+  font-weight:700;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  display:none;
+}
+.purchases-badge.show{display:flex;}
+
+.user-box{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font-size:16px;
+  font-weight:750;
+  justify-content:flex-end;
+}
+
+.user-box img{
+  width:48px;
+  height:48px;
+  border-radius:50%;
+  border:2px solid rgb(255, 255, 255);
+  object-fit:cover;
+  box-shadow:0 10px 22px rgba(0,0,0,0.35);
+}
+
+/* Center search (topbar) */
+.topbar-search{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  z-index:1;
+}
+.topbar-search input{
+  width:100%;
+  max-width:520px;
+  height:44px;
+  padding:0 44px 0 44px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,0.16);
+  background:linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.08));
+  color:#fff;
+  outline:none;
+  box-shadow:0 14px 38px rgba(0,0,0,0.35);
+}
+.topbar-search input::placeholder{color:rgba(255,255,255,0.70);}
+.topbar-search input:focus{
+  border-color:rgba(255,255,255,0.28);
+  background:linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.10));
+}
+.topbar-search .search-icon{
+  position:absolute;
+  left:14px;
+  width:18px;
+  height:18px;
+  opacity:0.82;
+  z-index:2;
+  pointer-events:none;
+}
+.topbar-search .search-clear{
+  position:absolute;
+  right:10px;
+  width:30px;
+  height:30px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,0.16);
+  background:rgba(255,255,255,0.10);
+  color:rgba(255,255,255,0.92);
+  cursor:pointer;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  transition:transform 0.2s ease, background 0.2s ease;
+}
+.topbar-search .search-clear:hover{transform:scale(1.05);background:rgba(255,255,255,0.16);}
+.topbar-search.has-value .search-clear{display:flex;}
+
+/* ========== CATALOGUE - 5 categories in row, Artworks 5 items ========== */
+.categories{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  gap:10px;
+  padding:50px 25px 100px;
+}
+
+.categories-row{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:25px;
+  flex-wrap:wrap;
+  width:100%;
+  max-width:1100px;
+}
+
+.card{
+    width:clamp(150px,180px,210px);
+  height:280px;
+  background:linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06));
+  border-radius:30px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition:all 0.4s ease;
+  backdrop-filter:blur(10px);
+  border:1px solid rgba(255, 255, 255, 0.22);
+  box-shadow:0 18px 45px rgba(0,0,0,0.28);
+
+}
+.card img{
+  width:85%;
+  height:165px;
+  object-fit:cover;
+  border-radius:12px;
+}
+.card span{
+  margin-top:10px;
+  font-weight:730;
+  font-size:25px;
+  text-align:center;
+}
+.card:hover{
+  transform:scale(1.06);
+  box-shadow:0 12px 35px rgba(0,0,0,0.25);
+  background:linear-gradient(180deg, rgba(255,255,255,0.18), rgba(9, 11, 148, 0.28));
+  border-color:rgba(255,255,255,0.4);
+}
+.artworks-row{
+  display:flex;
+  justify-content:center;
+  gap:20px;
+  flex-wrap:wrap;
+  width:100%;
+  max-width:900px;
+}
+.artworks-row .card{
+  flex:0 0 auto;
+  min-width:130px;
+  max-width:160px;
+}
+.artworks-label{
+  font-size:22px;
+  font-weight:700;
+  color:white;
+  text-shadow:0 2px 8px rgba(0,0,0,0.5);
+  margin-top:15px;
+}
+
+/* ========== PRODUCTS / CATALOGUE PAGE ========== */
+#productsPage{
+  display:none;
+  flex-direction:column;
+  min-height:100vh;
+  padding:100px 20px 90px;
+  background:url("AR.jpg") no-repeat center center/cover;
+  align-items:center;
+  overflow-y:auto;
+  position:relative;
+}
+
+.products-grid{
+  display:grid;
+  grid-template-columns:1fr 1.5fr 1fr;
+  gap:25px;
+  width:min(90%,1100px);
+  align-items:center;
+  margin:auto;
+}
+
+@media(max-width:768px){
+  .products-grid{grid-template-columns:1fr;gap:20px;}
+}
+
+.product-card{
+  background:linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.78));
+  border-radius:20px;
+  overflow:hidden;
+  box-shadow:var(--lux-shadow-soft);
+  transition:all 0.4s ease;
+  cursor:pointer;
+  color:#1a1a1a;
+  border:1px solid rgba(255,255,255,0.6);
+}
+.product-card img{
+  width:100%;
+  display:block;
+  object-fit:cover;
+}
+.product-card.small img{height:200px;}
+.product-card.big img{height:300px;}
+.product-card .product-info{
+  padding:18px;
+  text-align:center;
+}
+.product-card .product-name{
+  font-size:16px;
+  font-weight:600;
+  margin-bottom:8px;
+}
+.product-card .product-price{
+  font-size:18px;
+  font-weight:700;
+  color:#007aff;
+}
+.product-card:hover{
+  transform:scale(1.05);
+  box-shadow:0 20px 50px rgba(0,0,0,0.3);
+}
+
+.big .product-info{padding:22px;}
+.big .product-name{font-size:18px;}
+.big .product-price{font-size:22px;}
+
+.back-btn{
+  position:absolute;
+  top:25px;
+  left:25px;
+  padding:12px 22px;
+  background:linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.78));
+  color:#1a1a1a;
+  font-weight:600;
+  cursor:pointer;
+  border-radius:12px;
+  border:none;
+  font-size:15px;
+  box-shadow:0 4px 15px rgba(0,0,0,0.2);
+  transition:all 0.3s;
+  z-index:10;
+  border:1px solid rgba(255,255,255,0.65);
+}
+.back-btn:hover{
+  background:#f0f0f0;
+  transform:translateY(-2px);
+}
+
+/* ========== PRODUCT DETAIL PAGE ========== */
+#productDetailPage{
+  display:none;
+  flex-direction:column;
+  min-height:100vh;
+  padding:80px 20px 90px;
+  background:linear-gradient(180deg,#1a1a2e 0%,#16213e 100%);
+  overflow-y:auto;
+  position:relative;
+}
+
+.product-detail-container{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:50px;
+  max-width:1000px;
+  margin:0 auto;
+  align-items:start;
+}
+
+@media(max-width:768px){
+  .product-detail-container{grid-template-columns:1fr;}
+}
+
+/* Image slider */
+.product-slider{
+  position:relative;
+  background:linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.78));
+  border-radius:24px;
+  overflow:hidden;
+  box-shadow:0 20px 60px rgba(0,0,0,0.4);
+  border:1px solid rgba(255,255,255,0.65);
+}
+.slider-main{
+  width:100%;
+  aspect-ratio:1;
+  position:relative;
+  overflow:hidden;
+  background:rgba(255,255,255,0.75);
+}
+/* Smooth slide (3 images per product) */
+.slider-track{
+  display:flex;
+  width:300%;
+  height:100%;
+  transition:transform 0.55s cubic-bezier(.2,.85,.25,1);
+}
+.slider-track img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  flex:0 0 33.3333%;
+}
+
+.slider-arrow{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  width:50px;
+  height:50px;
+  background:linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.75));
+  border:none;
+  border-radius:50%;
+  cursor:pointer;
+  font-size:24px;
+  color:#1a1a1a;
+  transition:all 0.3s;
+  z-index:5;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 12px 28px rgba(0,0,0,0.25);
+  border:1px solid rgba(255,255,255,0.65);
+}
+.slider-arrow:hover{background:white;transform:translateY(-50%) scale(1.1);}
+.slider-arrow.prev{left:15px;}
+.slider-arrow.next{right:15px;}
+
+/* Product detail right side */
+.product-detail-info{
+  background:linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.78));
+  border-radius:24px;
+  padding:35px;
+  color:#1a1a1a;
+  box-shadow:0 20px 60px rgba(0,0,0,0.3);
+  border:1px solid rgba(255,255,255,0.65);
+}
+.product-detail-info h1{
+  font-size:28px;
+  margin-bottom:15px;
+  font-weight:700;
+}
+.product-detail-price{
+  font-size:26px;
+  font-weight:700;
+  color:#007aff;
+  margin-bottom:25px;
+}
+.product-detail-info input{
+  width:100%;
+  padding:14px 16px;
+  margin:10px 0;
+  border:1px solid #ddd;
+  border-radius:10px;
+  font-size:16px;
+}
+.product-detail-info input:focus{
+  outline:none;
+  border-color:#007aff;
+}
+.detail-btn{
+  display:block;
+  width:100%;
+  padding:16px;
+  margin-top:12px;
+  border:none;
+  border-radius:12px;
+  font-size:17px;
+  font-weight:600;
+  cursor:pointer;
+  transition:all 0.3s;
+  text-align:center;
+}
+.detail-btn.whatsapp{
+  background:#25D366;
+  color:white;
+}
+.detail-btn.whatsapp:hover{background:#20bd5a;transform:translateY(-2px);}
+.detail-btn.buy{
+  background:linear-gradient(135deg, #0b2b57, #007aff);
+  color:white;
+}
+.detail-btn.buy:hover{background:#0066d6;transform:translateY(-2px);}
+
+/* Reviews (product detail) */
+.product-reviews{
+  margin-top:18px;
+  padding-top:16px;
+  border-top:1px solid rgba(0,0,0,0.10);
+}
+.rating-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.stars{
+  display:flex;
+  gap:4px;
+  font-size:16px;
+  color:#c9a227;
+  letter-spacing:0.02em;
+}
+.stars .star{
+  filter:drop-shadow(0 2px 6px rgba(0,0,0,0.18));
+}
+.rating-meta{
+  font-size:13px;
+  color:#666;
+  font-weight:600;
+}
+.comment-list{
+  margin-top:12px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.comment{
+  background:rgba(0,0,0,0.04);
+  border:1px solid rgba(0,0,0,0.06);
+  border-radius:14px;
+  padding:12px 14px;
+}
+.comment .comment-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:6px;
+}
+.comment .comment-user{
+  font-weight:700;
+  color:#1a1a1a;
+  font-size:13px;
+}
+.comment .comment-time{
+  font-size:12px;
+  color:#777;
+  font-weight:600;
+}
+.comment .comment-text{
+  font-size:13px;
+  color:#333;
+  line-height:1.35;
+}
+.detail-btn.back{
+  background:#f0f0f0;
+  color:#1a1a1a;
+  margin-top:20px;
+}
+.detail-btn.back:hover{background:#e0e0e0;}
+.detail-btn.secondary-link{
+  background:#e8e8e8;
+  color:#333;
+  margin-top:10px;
+}
+.detail-btn.secondary-link:hover{background:#ddd;}
+.product-detail-desc{
+  margin-bottom:20px;
+  color:#555;
+  font-size:15px;
+  line-height:1.5;
+  min-height:24px;
+}
+
+/* ========== MY PURCHASES PAGE ========== */
+#purchasesPage{
+  display:none;
+  flex-direction:column;
+  min-height:100vh;
+  padding:100px 20px 90px;
+  background:linear-gradient(180deg,#1a1a2e 0%,#16213e 100%);
+  overflow-y:auto;
+  position:relative;
+}
+
+.purchases-container{
+  max-width:700px;
+  margin:0 auto;
+  width:100%;
+}
+.purchase-card{
+  background:white;
+  border-radius:20px;
+  padding:25px;
+  margin-bottom:25px;
+  display:flex;
+  gap:25px;
+  align-items:center;
+  box-shadow:0 10px 40px rgba(0,0,0,0.2);
+  color:#1a1a1a;
+}
+.purchase-card img{
+  width:100px;
+  height:100px;
+  object-fit:cover;
+  border-radius:12px;
+}
+.purchase-details{flex:1;}
+.purchase-name{font-weight:700;font-size:18px;margin-bottom:5px;}
+.purchase-price{color:#007aff;font-weight:600;}
+.purchase-quantity{margin-top:5px;font-size:14px;color:#666;}
+.purchase-total{font-weight:700;font-size:20px;margin-top:10px;}
+.purchase-delete{
+  padding:10px 18px;
+  background:#dc3545;
+  color:white;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:600;
+  transition:all 0.3s;
+}
+.purchase-delete:hover{
+  background:#c82333;
+  transform:scale(1.05);
+}
+.purchases-header{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:15px;
+  margin-bottom:25px;
+}
+.purchases-header h2{font-size:24px;color:white;}
+.purchases-counter{
+  background:rgba(255,255,255,0.3);
+  color:white;
+  padding:8px 16px;
+  border-radius:20px;
+  font-weight:700;
+  font-size:16px;
+  min-width:40px;
+  text-align:center;
+}
+.purchases-empty{
+  text-align:center;
+  padding:60px 20px;
+  color:rgba(255,255,255,0.8);
+  font-size:18px;
+}
+.purchases-buy-all{
+  display:flex;
+  gap:15px;
+  justify-content:center;
+  flex-wrap:wrap;
+  margin-top:30px;
+  padding:20px;
+}
+.purchases-buy-all .detail-btn{max-width:220px;}
+
+/* ========== MY ACCOUNT PAGE ========== */
+#accountPage{
+  display:none;
+  flex-direction:column;
+  min-height:100vh;
+  padding:80px 20px 120px;
+  background:linear-gradient(180deg,#1a1a2e 0%,#16213e 100%);
+  overflow-y:auto;
+}
+
+.account-container{
+  max-width:500px;
+  margin:0 auto;
+  width:100%;
+}
+.account-card{
+  background:white;
+  border-radius:24px;
+  padding:40px;
+  color:#1a1a1a;
+  box-shadow:0 20px 60px rgb(0, 0, 0);
+  text-align:center;
+}
+.account-avatar{
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  object-fit:cover;
+  margin:0 auto 20px;
+  display:block;
+  border:4px solid #007aff;
+  cursor:pointer;
+  transition:transform 0.3s;
+}
+.account-avatar:hover{transform:scale(1.05);}
+.account-card input{
+  width:100%;
+  padding:14px 16px;
+  margin:12px 0;
+  border:1px solid #ddd;
+  border-radius:10px;
+  font-size:16px;
+}
+.account-card textarea{
+  width:100%;
+  padding:14px 16px;
+  margin:12px 0;
+  border:1px solid #ddd;
+  border-radius:10px;
+  font-size:16px;
+  min-height:80px;
+  resize:vertical;
+}
+.account-save-btn{
+  display:block;
+  width:100%;
+  padding:16px;
+  margin-top:20px;
+  background:linear-gradient(135deg,#007aff,#0051d5);
+  color:white;
+  border:none;
+  border-radius:12px;
+  font-size:17px;
+  font-weight:600;
+  cursor:pointer;
+  transition:all 0.3s;
+}
+.account-save-btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 25px rgba(0,122,255,0.4);
+}
+.account-gmail-link{
+  display:inline-block;
+  margin-top:25px;
+  padding:14px 28px;
+  background:#ea4335;
+  color:white;
+  border-radius:12px;
+  text-decoration:none;
+  font-weight:600;
+  transition:all 0.3s;
+}
+.account-gmail-link:hover{
+  transform:translateY(-2px);
+  box-shadow:0 6px 20px rgba(234,67,53,0.4);
+}
+
+/* ========== HELP / SUPPORT PAGE ========== */
+#helpPage{
+  display:none;
+  flex-direction:column;
+  min-height:100vh;
+  padding:100px 20px 90px;
+  background:linear-gradient(180deg,#1a1a2e 0%,#16213e 100%);
+  overflow-y:auto;
+  position:relative;
+}
+
+.help-container{
+  max-width:500px;
+  margin:0 auto;
+  width:100%;
+}
+.help-card{
+  background:white;
+  border-radius:24px;
+  padding:40px;
+  color:#1a1a1a;
+  box-shadow:0 20px 60px rgb(98, 1, 255);
+  text-align:center;
+}
+.help-card h2{
+  margin-bottom:25px;
+  font-size:24px;
+}
+.help-buttons{
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+  margin:20px 0;
+}
+.help-email{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:16px 28px;
+  background:#e90619;
+  color:white;
+  border-radius:12px;
+  text-decoration:none;
+  font-weight:600;
+  transition:all 0.35s ease;
+}
+.help-email:hover{
+  background:#000000;
+  transform:translateY(-3px);
+  box-shadow:0 8px 25px rgba(255, 17, 0, 0.76);
+}
+.help-whatsapp{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:16px 28px;
+  background:#25D366;
+  color:white;
+  border-radius:12px;
+  text-decoration:none;
+  font-weight:600;
+  transition:all 0.35s ease;
+}
+.help-whatsapp:hover{
+  background:#20bd5a;
+  transform:translateY(-3px);
+  box-shadow:0 8px 25px rgba(12, 230, 30, 0.62);
+}
+.help-instagram{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:16px 28px;
+  background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);
+  color:white;
+  border-radius:12px;
+  text-decoration:none;
+  font-weight:600;
+  transition:all 0.35s ease;
+}
+.help-instagram:hover{
+  transform:translateY(-3px);
+  box-shadow:0 8px 25px rgba(235, 43, 161, 0.48);
+}
+.help-support-text{
+  margin-top:30px;
+  font-size:20px;
+  font-weight:600;
+  color:#333;
+  font-family:inherit;
+}
+
+/* ========== ORDER CONFIRMATION NOTIFICATION ========== */
+#orderNotification{
+  position:fixed;
+  top:20px;
+  left:50%;
+  transform:translateX(-50%) translateY(-150%);
+  background:linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.78));
+  color:#1a1a1a;
+  padding:10px 35px;
+  border-radius:16px;
+  box-shadow:0 15px 50px rgba(0,0,0,0.4);
+  z-index:2000;
+  font-weight:600;
+  font-size:16px;
+  transition:transform 0.4s ease;
+}
+#orderNotification.show{
+  transform:translateX(-50%) translateY(0);
+}
+
+/* ========== RESPONSIVE ========== */
+@media(max-width:768px){
+  .login-welcome-title{font-size:1.8rem;top:12%;}
+  .login-brand{font-size:1.8rem;top:calc(12% + 45px);}
+  .loginSection{padding-bottom:120px;}
+  .categories{padding:30px 15px 80px;}
+  .categories-row{gap:15px;}
+  .card{min-width:120px;max-width:160px;}
+  .artworks-row .card{min-width:100px;max-width:130px;}
+  .topbar{padding:15px 15px;grid-template-columns:1fr;gap:12px;}
+  .menu{font-size:14px;gap:15px;}
+  .user-box{justify-content:flex-start;}
+  .product-detail-container{gap:30px;}
+  .purchases-buy-all{flex-direction:column;}
+}
+
+@media(max-width:600px){
+  .login-welcome-title{font-size:1.5rem;}
+  .login-brand{font-size:1.5rem;}
+  .btn{min-width:240px;}
+  .categories{gap:20px;padding:25px 10px 90px;}
+  .categories-row{gap:12px;}
+  .card{min-width:100px;max-width:140px;height:180px;}
+  .card img{height:90px;}
+  .artworks-row{gap:12px;}
+  .artworks-row .card{min-width:90px;max-width:110px;height:160px;}
+  .artworks-label{font-size:18px;}
+  .products-grid{grid-template-columns:1fr;}
+  .product-detail-container{grid-template-columns:1fr;}
+  .purchase-card{flex-direction:column;text-align:center;}
+  .account-card{padding:25px;}
+}
+
+@media(max-width:400px){
+  .login-buttons{flex-direction:column;}
+  .lang-box .btn{min-width:220px;}
+}
+</style>
+</head>
+<body>
+
+<!-- Firebase (compat) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+
+<!-- LOGIN SECTION -->
+<div id="loginSection">
+  <div class="btn" onclick="openSignIn()" id="loginText">LOGIN</div>
+  <div class="lang-box">
+    <div class="btn" onclick="setLang('ar')">العربية</div>
+    <div class="btn" onclick="setLang('fr')">Français</div>
+    <div class="btn" onclick="setLang('en')">English</div>
+  </div>
+</div>
+
+<!-- WELCOME SECTION (shown after login, fades to store) -->
+<div id="welcomeSection">
+  <h1 class="welcome-title" id="welcomeTitle">Welcome to My Store</h1>
+  
+</div>
+
+<!-- SIGN IN MODAL -->
+<div class="modal" id="signInModal">
+  <div class="modal-content">
+    <h2 id="signTitle">Sign In</h2>
+    <input type="email" id="emailInput" placeholder="Email">
+    <div class="password-wrapper">
+      <input type="password" id="passInput" placeholder="Password">
+      <button type="button" class="password-toggle" onclick="togglePassword('passInput','signInEye')" id="signInEye" title="Toggle password visibility">👁</button>
+    </div>
+    <button class="modal-btn" onclick="playClick();doSignIn()" id="continueText">Continue</button>
+    <button class="modal-btn secondary" onclick="playClick();enterStore(true)" id="guestText">Continue as Guest</button>
+    <button class="modal-btn secondary" onclick="playClick();googleLogin()" id="googleLoginText">Login with Google</button>
+    <button class="modal-btn secondary" onclick="playClick();openCreate()" id="createAccText">Create Account</button>
+    <button class="modal-back" onclick="playClick();closeSignIn()" id="signInBackText">Back</button>
+  </div>
+</div>
+
+<!-- CREATE ACCOUNT MODAL -->
+<div class="modal" id="createModal">
+  <div class="modal-content">
+    <h2 id="createTitle">Create Account</h2>
+    <input type="text" id="createName" placeholder="Full Name">
+    <input type="email" id="createEmail" placeholder="Email">
+    <div class="password-wrapper">
+      <input type="password" id="createPass" placeholder="Password">
+      <button type="button" class="password-toggle" onclick="togglePassword('createPass','createEye')" id="createEye" title="Toggle password visibility">👁</button>
+    </div>
+    <button class="modal-btn" onclick="submitCreateAccount()" id="createSubmitText">Create Account</button>
+    <button class="modal-back" onclick="closeCreate()" id="createBackText">Back</button>
+  </div>
+</div>
+
+
+<!-- STORE SECTION -->
+<div id="storeSection">
+  <div class="topbar">
+    <div class="menu">
+      <span id="myAcc" onclick="showAccount()">My Account</span>
+      <span class="menu-item-wrap"><span id="myPurchasesText" onclick="showPurchases()">My Purchases</span><span class="purchases-badge" id="purchasesBadge">0</span></span>
+      <span id="help" onclick="showHelp()">Help</span>
+      <span id="backStore" onclick="backToLogin()">Back</span>
+    </div>
+    <div class="topbar-search" id="topbarSearchWrap">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10 2a8 8 0 1 1 5.293 14.004l3.851 3.852a1 1 0 0 1-1.414 1.414l-3.852-3.851A8 8 0 0 1 10 2Zm0 2a6 6 0 1 0 0 12a6 6 0 0 0 0-12Z"/></svg>
+      <input id="topbarSearch" type="search" placeholder="Search products" oninput="onTopbarSearchInput(event)">
+      <button class="search-clear" type="button" onclick="clearTopbarSearch()" aria-label="Clear search">×</button>
+    </div>
+    <div class="user-box">
+      <img src="gust.png" id="userAvatar" alt="Profile">
+      <span id="username">Guest</span>
+    </div>
+  </div>
+  <div class="categories">
+    <div class="categories-row">
+      <div class="card" onclick="openProducts(1)"><img src="parf.jpeg" alt="Parfum"><span id="cat1">Parfum</span></div>
+      <div class="card" onclick="openProducts(2)"><img src="2.jpeg" alt="Electronics"><span id="cat2">Electronics</span></div>
+      <div class="card" onclick="openProducts(3)"><img src="3.jpeg" alt="Clothing"><span id="cat3">Clothing</span></div>
+      <div class="card" onclick="openProducts(4)"><img src="4.jpeg" alt="Watches"><span id="cat4">Watches</span></div>
+      <div class="card" onclick="openProducts(5)"><img src="5.jpeg" alt="Shoes"><span id="cat5">Shoes</span></div>
+    </div>
+     </div>
+  </div>
+</div>
+
+<!-- PRODUCTS / CATALOGUE PAGE -->
+<div id="productsPage">
+  <button class="back-btn" onclick=" backToStore()" id="backText">Back</button>
+  <div class="products-grid" id="productsGrid"></div>
+</div>
+
+<!-- PRODUCT DETAIL PAGE -->
+<div id="productDetailPage">
+  <button class="back-btn" onclick="playClick();backToStore()" id="detailBackText">Back</button>
+  <div class="product-detail-container">
+    <div class="product-slider">
+      <div class="slider-main" id="sliderMain"></div>
+      <button class="slider-arrow prev" onclick="playClick();slidePrev()">&#10094;</button>
+      <button class="slider-arrow next" onclick="playClick();slideNext()">&#10095;</button>
+    </div>
+    <div class="product-detail-info">
+      <h1 id="detailProductName">Product</h1>
+      <div class="product-detail-price" id="detailPrice">0 MAD</div>
+      <p class="product-detail-desc" id="detailDesc"></p>
+      <div class="product-reviews" id="productReviews"></div>
+      <input type="text" id="detailName" placeholder="Name">
+      <input type="text" id="detailCity" placeholder="City">
+      <input type="tel" id="detailPhone" placeholder="Phone Number">
+      <input type="number" id="detailQty" placeholder="Quantity" min="1" value="1">
+      <button class="detail-btn whatsapp" onclick="playClick();sendWhatsAppOrder()" id="whatsappBtn">Order via WhatsApp</button>
+      <button class="detail-btn buy" onclick="playClick();placeOrder()" id="buyBtn">Buy</button>
+      <button class="detail-btn back" onclick="playClick();backToStore()" id="detailBackBtn">Back to Store</button>
+      <button class="detail-btn secondary-link" onclick="playClick();showPurchases()" id="detailMyPurchasesBtn">My Purchases</button>
+    </div>
+  </div>
+</div>
+
+<!-- MY PURCHASES PAGE -->
+<div id="purchasesPage">
+  <button class="back-btn" onclick="playClick();showStore()" id="purchasesBackText">Back</button>
+  <div class="purchases-header">
+    <h2 id="purchasesTitle">My Purchases</h2>
+    <span class="purchases-counter" id="purchasesCounter">0</span>
+  </div>
+  <div class="purchases-container">
+    <div id="purchasesList"></div>
+    <div class="purchases-empty" id="purchasesEmpty" style="display:none;">No purchases yet</div>
+    <div class="purchases-buy-all" id="purchasesBuyAllWrap" style="display:none;">
+      <button class="detail-btn whatsapp" onclick="playClick();buyAllWhatsApp()" id="buyAllWhatsAppBtn">Buy All via WhatsApp</button>
+      <button class="detail-btn buy" onclick="playClick();buyAllGmail()" id="buyAllGmailBtn">Buy</button>
+    </div>
+  </div>
+</div>
+
+<!-- MY ACCOUNT PAGE -->
+<div id="accountPage">
+  <button class="back-btn" onclick="playClick();showStore()" id="accountBackText">Back</button>
+  <div class="account-container">
+    <div class="account-card">
+      <img src="1.jpeg" class="account-avatar" id="accountAvatar" alt="Profile" onclick="playClick();document.getElementById('avatarInput').click()">
+      <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="changeAvatar(event)">
+      <input type="text" id="accountUsername" placeholder="Username">
+      <textarea id="accountDesc" placeholder="Description"></textarea>
+      <button class="account-save-btn" onclick="playClick();saveProfile()" id="accountSaveText">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- HELP PAGE -->
+<div id="helpPage">
+  <button class="back-btn" onclick="playClick();showStore()" id="helpBackText">Back</button>
+  <div class="help-container">
+    <div class="help-card">
+      <h2 id="helpTitle">Help & Support</h2>
+      <p class="help-support-text" id="helpSupportText">نحن دائما في خدمتكم</p>
+      <div class="help-buttons">
+        <a href="https://wa.me/212632592347" target="_blank" class="help-whatsapp" id="helpWhatsappLink">WhatsApp: +212 632-592347</a>
+        <a href="mailto:mondiraghbalou@gmail.com" class="help-email" id="helpGmailLink">Gmail</a>
+        <a href="https://www.instagram.com/ar_store_7/" target="_blank" class="help-instagram" id="helpInstagramLink">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073z"/></svg>
+          Instagram
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ORDER NOTIFICATION -->
+<div id="orderNotification">
+  <span id="orderNotifText">Your order has been confirmed. The store admin will contact you.</span>
+</div>
+
+<footer id="footerText">© 2026 Mondir Aghbalou — All rights reserved</footer>
+
+<script>
+/* ========== CONFIGURATION ========== */
+const STORE_EMAIL = "mondiraghbalou@gmail.com";
+const WHATSAPP_NUMBER = "212632592347";
+const SESSION_KEY = "arStoreSession";
+
+// Firebase config (replace with your project's values)
+const FIREBASE_CONFIG = {
+  apiKey: "REPLACE_ME",
+  authDomain: "REPLACE_ME",
+  projectId: "REPLACE_ME",
+  appId: "REPLACE_ME"
+};
+
+let firebaseApp = null;
+let auth = null;
+let db = null;
+function initFirebase(){
+  try{
+    if(!firebase?.apps?.length){
+      firebaseApp = firebase.initializeApp(FIREBASE_CONFIG);
+    }else{
+      firebaseApp = firebase.app();
+    }
+    auth = firebase.auth();
+    db = firebase.firestore();
+  }catch(e){
+    // Firebase not configured yet; site still works in local-only mode.
+  }
+}
+initFirebase();
+
+/* Product catalog: name, price MAD per category; category product images below */
+const PRODUCTS = [
+  {img:"parf.jpeg",name:"Parfum",price:299,city:"",phone:"",desc:""},
+  {img:"2.jpeg",name:"Electronics",price:899,city:"",phone:"",desc:""},
+  {img:"3.jpeg",name:"Clothing",price:450,city:"",phone:"",desc:""},
+  {img:"4.jpeg",name:"Watches",price:1200,city:"",phone:"",desc:""},
+  {img:"5.jpeg",name:"Shoes",price:380,city:"",phone:"",desc:""}
+];
+/* Per-category product images (3 per category) */
+const CATEGORY_PRODUCTS = {
+  1:[{img:"parfumes 1.jpeg",name:"Parfum",price:299,desc:""},{img:"parfumes 2.jpeg",name:"Parfum",price:150,desc:""},{img:"parfumes 3.jpeg",name:"Parfum",price:100,desc:""}],
+  2:[{img:"pc 1.jpeg",name:"Electronics",price:899,desc:""},{img:"pc 2.jpeg",name:"Electronics",price:899,desc:""},{img:"pc 4.jpeg",name:"Electronics",price:899,desc:""}],
+  3:[{img:"vetem7.jpeg",name:"Clothing",price:450,desc:""},{img:"vetem8.jpeg",name:"Clothing",price:450,desc:""},{img:"vetem 3.jpeg",name:"Clothing",price:450,desc:""}],
+  4:[{img:"watche 1.jpeg",name:"Watches",price:1200,desc:""},{img:"watche 2.jpeg",name:"Watches",price:1200,desc:""},{img:"watche 3.jpeg",name:"Watches",price:1200,desc:""}],
+  5:[{img:"chose 1.jpeg",name:"Shoes",price:380,desc:""},{img:"chose 2.jpeg",name:"Shoes",price:380,desc:""},{img:"chose 3.jpeg",name:"Shoes",price:380,desc:""}]
+};
+
+/* Slider images - 3 images per product */
+const getSliderImages = (img)=>[img,img,img];
+
+/* Ratings & comments (minimal mock data per product) */
+const PRODUCT_REVIEWS = {
+  "Parfum": {rating: 4.8, count: 128, comments:[
+    {user:"Amine", time:"2d", text:"Elegant scent, lasts all day."},
+    {user:"Sara", time:"1w", text:"Packaging feels premium. Great gift."},
+    {user:"Yasmine", time:"2w", text:"Soft luxury vibe, not overpowering."}
+  ]},
+  "Electronics": {rating: 4.6, count: 94, comments:[
+    {user:"Khalid", time:"3d", text:"Fast delivery, quality is solid."},
+    {user:"Noura", time:"1w", text:"Works perfectly. Clean design."},
+    {user:"Omar", time:"3w", text:"Great value for the price."}
+  ]},
+  "Clothing": {rating: 4.7, count: 76, comments:[
+    {user:"Aya", time:"4d", text:"Material feels high-end and comfortable."},
+    {user:"Hamza", time:"1w", text:"Fits well. Looks luxurious."},
+    {user:"Mina", time:"2w", text:"Beautiful style, I recommend it."}
+  ]},
+  "Watches": {rating: 4.9, count: 210, comments:[
+    {user:"Rachid", time:"2d", text:"Very elegant, looks expensive."},
+    {user:"Imane", time:"5d", text:"Perfect shine and detail."},
+    {user:"Soufiane", time:"2w", text:"Amazing finish. Love it."}
+  ]},
+  "Shoes": {rating: 4.5, count: 61, comments:[
+    {user:"Salma", time:"6d", text:"Comfortable and classy."},
+    {user:"Younes", time:"1w", text:"Great look, good quality."},
+    {user:"Hiba", time:"3w", text:"Nice fit and premium feel."}
+  ]}
+};
+
+let currentLang = "en";
+let currentProduct = null;
+let sliderIndex = 0;
+let lastCategoryId = 1;
+let cartItems = JSON.parse(localStorage.getItem("arStorePurchases")||"[]"); // kept key for backward compatibility
+let userProfile = JSON.parse(localStorage.getItem("arStoreProfile")||'{"username":"Guest","avatar":"gust.png"}');
+const ACCOUNTS_KEY = "arStoreAccounts";
+function getAccounts(){ try{ return JSON.parse(localStorage.getItem(ACCOUNTS_KEY)||"[]"); }catch(e){ return []; } }
+function setAccounts(arr){ localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(arr)); }
+
+// Products identity for Firestore (stable across sessions)
+function productIdFrom(prod){
+  const base = `${prod?.name||"product"}|${prod?.img||""}|${prod?.price||0}`;
+  return base.toLowerCase().replace(/[^a-z0-9|]+/g,"-").slice(0,120);
+}
+
+function isFirebaseReady(){
+  return !!(auth && db && FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey !== "REPLACE_ME");
+}
+
+function showToast(message){
+  const el = document.getElementById("orderNotifText");
+  if(el) el.textContent = message;
+  showOrderNotification();
+}
+
+async function ensureSignedInOrToast(){
+  if(!isFirebaseReady()) return true; // local mode: allow
+  const u = auth.currentUser;
+  if(u) return true;
+  showToast(currentLang==="ar"?"يرجى تسجيل الدخول أولاً":currentLang==="fr"?"Veuillez vous connecter d'abord":"Please sign in first");
+  openSignIn();
+  return false;
+}
+
+/* ========== CLICK SOUND ========== */
+function playClick(){
+  try{
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const osc=ctx.createOscillator();
+    const gain=ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value=800;
+    osc.type="sine";
+    gain.gain.setValueAtTime(0.08,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01,ctx.currentTime+0.05);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime+0.05);
+  }catch(e){}
+}
+
+/* ========== PASSWORD VISIBILITY TOGGLE ========== */
+function togglePassword(inputId,btnId){
+  const input=document.getElementById(inputId);
+  const btn=document.getElementById(btnId);
+  if(input.type==="password"){input.type="text";btn.textContent="🙈";}
+  else{input.type="password";btn.textContent="👁";}
+}
+
+/* ========== MODAL OPEN/CLOSE ========== */
+function openSignIn(){
+  document.getElementById("signInModal").style.display="flex";
+}
+function closeSignIn(){
+  document.getElementById("signInModal").style.display="none";
+}
+function openCreate(){
+  document.getElementById("signInModal").style.display="none";
+  document.getElementById("createModal").style.display="flex";
+}
+function closeCreate(){
+  document.getElementById("createModal").style.display="none";
+  document.getElementById("signInModal").style.display="flex";
+}
+
+function changeCreateAvatar(e){
+  const f=e.target.files[0];
+  if(f){
+    const r=new FileReader();
+    r.onload=()=>{
+      userProfile.avatar=r.result;
+      const prev=document.getElementById("createAvatarPreview");
+      if(prev)prev.src=r.result;
+    };
+    r.readAsDataURL(f);
+  }
+}
+
+/* ========== CREATE ACCOUNT - Save to localStorage, redirect to Store ========== */
+async function submitCreateAccount(){
+  const name=document.getElementById("createName").value.trim();
+  const email=document.getElementById("createEmail").value.trim().toLowerCase();
+  const pass=document.getElementById("createPass").value;
+  if(!name||!email||!pass){
+    const msg=currentLang==="ar"?"يرجى ملء جميع الحقول":currentLang==="fr"?"Veuillez remplir tous les champs":"Please fill all fields";
+    alert(msg);
+    return;
+  }
+
+  // Firebase mode
+  if(isFirebaseReady()){
+    try{
+      const cred = await auth.createUserWithEmailAndPassword(email, pass);
+      await cred.user.updateProfile({displayName: name});
+      await db.collection("profiles").doc(cred.user.uid).set({
+        username: name,
+        avatar: userProfile.avatar||"gust.png",
+        desc: userProfile.desc||"",
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, {merge:true});
+      localStorage.setItem(SESSION_KEY, JSON.stringify({mode:"user"}));
+      applyAuthedUI(cred.user);
+      document.getElementById("loginSection").style.display="none";
+      document.getElementById("createModal").style.display="none";
+      document.getElementById("signInModal").style.display="none";
+      showWelcome();
+      return;
+    }catch(e){
+      const msg = (e?.code==="auth/email-already-in-use")
+        ? (currentLang==="ar"?"البريد مستخدم مسبقاً":currentLang==="fr"?"Cet email est déjà utilisé":"This email is already registered")
+        : (currentLang==="ar"?"تعذر إنشاء الحساب":currentLang==="fr"?"Impossible de créer le compte":"Could not create account");
+      alert(msg);
+      return;
+    }
+  }
+
+  // Local fallback (no Firebase config yet)
+  const accounts=getAccounts();
+  if(accounts.some(a=>a.email.toLowerCase()===email)){
+    const msg=currentLang==="ar"?"البريد مستخدم مسبقاً":currentLang==="fr"?"Cet email est déjà utilisé":"This email is already registered";
+    alert(msg);
+    return;
+  }
+  accounts.push({name,email,password:pass});
+  setAccounts(accounts);
+  userProfile.username=name;
+  userProfile.avatar=userProfile.avatar||"gust.png";
+  localStorage.setItem("arStoreProfile",JSON.stringify(userProfile));
+  localStorage.setItem(SESSION_KEY, JSON.stringify({mode:"user", email}));
+  document.getElementById("username").innerText=name;
+  document.getElementById("userAvatar").src=userProfile.avatar||"gust.png";
+  const accUser=document.getElementById("accountUsername");
+  if(accUser)accUser.value=name;
+  const accDesc=document.getElementById("accountDesc");
+  if(accDesc)accDesc.value=userProfile.desc||"";
+  document.getElementById("loginSection").style.display="none";
+  document.getElementById("createModal").style.display="none";
+  document.getElementById("signInModal").style.display="none";
+  showWelcome();
+}
+
+/* ========== SIGN IN - Validate then enter store ========== */
+async function doSignIn(){
+  const email=document.getElementById("emailInput").value.trim().toLowerCase();
+  const pass=document.getElementById("passInput").value;
+  if(!email||!pass){
+    const msg=currentLang==="ar"?"يرجى إدخال البريد وكلمة المرور":currentLang==="fr"?"Veuillez entrer l'email et le mot de passe":"Please enter email and password";
+    alert(msg);
+    return;
+  }
+
+  // Firebase mode
+  if(isFirebaseReady()){
+    try{
+      const cred = await auth.signInWithEmailAndPassword(email, pass);
+      localStorage.setItem(SESSION_KEY, JSON.stringify({mode:"user"}));
+      applyAuthedUI(cred.user);
+      document.getElementById("loginSection").style.display="none";
+      document.getElementById("signInModal").style.display="none";
+      document.getElementById("createModal").style.display="none";
+      showWelcome();
+      return;
+    }catch(e){
+      const msg = (e?.code==="auth/user-not-found")
+        ? (currentLang==="ar"?"البريد غير مسجل":currentLang==="fr"?"Email non enregistré":"Email not registered")
+        : (e?.code==="auth/wrong-password" || e?.code==="auth/invalid-credential")
+          ? (currentLang==="ar"?"كلمة المرور غير صحيحة":currentLang==="fr"?"Mot de passe incorrect":"Wrong password")
+          : (currentLang==="ar"?"تعذر تسجيل الدخول":currentLang==="fr"?"Connexion impossible":"Sign in failed");
+      alert(msg);
+      return;
+    }
+  }
+
+  // Local fallback
+  const accounts=getAccounts();
+  const acc=accounts.find(a=>a.email.toLowerCase()===email);
+  if(!acc){
+    const msg=currentLang==="ar"?"البريد غير مسجل":currentLang==="fr"?"Email non enregistré":"Email not registered";
+    alert(msg);
+    return;
+  }
+  if(acc.password!==pass){
+    const msg=currentLang==="ar"?"كلمة المرور غير صحيحة":currentLang==="fr"?"Mot de passe incorrect":"Wrong password";
+    alert(msg);
+    return;
+  }
+  userProfile.username=acc.name;
+  userProfile.avatar=userProfile.avatar||"gust.png";
+  document.getElementById("username").innerText=acc.name;
+  document.getElementById("userAvatar").src=userProfile.avatar||"gust.png";
+  localStorage.setItem("arStoreProfile",JSON.stringify(userProfile));
+  localStorage.setItem(SESSION_KEY, JSON.stringify({mode:"user", email}));
+  document.getElementById("loginSection").style.display="none";
+  document.getElementById("signInModal").style.display="none";
+  document.getElementById("createModal").style.display="none";
+  showWelcome();
+}
+
+/* ========== ENTER STORE - Guest or after sign in ========== */
+function enterStore(isGuest){
+  if(!isGuest){ doSignIn(); return; }
+  document.getElementById("username").innerText="Guest";
+  document.getElementById("userAvatar").src="gust.png";
+  localStorage.setItem(SESSION_KEY, JSON.stringify({mode:"guest"}));
+  document.getElementById("loginSection").style.display="none";
+  document.getElementById("signInModal").style.display="none";
+  document.getElementById("createModal").style.display="none";
+  showWelcome();
+}
+
+function showWelcome(){
+  document.getElementById("welcomeSection").style.display="flex";
+  document.getElementById("welcomeSection").classList.remove("fadeOut");
+  document.getElementById("welcomeSection").style.animation="welcomeFadeIn 1.2s ease forwards";
+  setTimeout(()=>{
+    document.getElementById("welcomeSection").classList.add("fadeOut");
+    setTimeout(()=>{
+      document.getElementById("welcomeSection").style.display="none";
+      document.getElementById("storeSection").style.display="flex";
+    },800);
+  },2200);
+}
+
+function backToLogin(){
+  localStorage.removeItem(SESSION_KEY);
+  try{ if(isFirebaseReady()) auth.signOut(); }catch(e){}
+  hideAllPages();
+  document.getElementById("loginSection").style.display="flex";
+  document.getElementById("footerText").style.display="block";
+}
+
+function hideAllPages(){
+  ["storeSection","productsPage","productDetailPage","purchasesPage","accountPage","helpPage"].forEach(id=>{
+    document.getElementById(id).style.display="none";
+  });
+  document.getElementById("footerText").style.display="none";
+}
+
+function updatePurchasesBadge(onPurchasesPage){
+  const badge=document.getElementById("purchasesBadge");
+  if(!badge)return;
+  const count=cartItems.length;
+  if(onPurchasesPage||count===0){ badge.classList.remove("show"); badge.textContent="0"; }
+  else{ badge.textContent=String(count); badge.classList.add("show"); }
+}
+
+function showStore(){
+  hideAllPages();
+  document.getElementById("storeSection").style.display="flex";
+  document.getElementById("footerText").style.display="block";
+  updatePurchasesBadge(false);
+}
+
+function showAccount(){
+  hideAllPages();
+  document.getElementById("accountPage").style.display="flex";
+  document.getElementById("footerText").style.display="none";
+  document.getElementById("accountUsername").value=userProfile.username||"";
+  document.getElementById("accountDesc").value=userProfile.desc||"";
+  document.getElementById("accountAvatar").src=userProfile.avatar||"gust.png";
+}
+function showPurchases(){
+  hideAllPages();
+  document.getElementById("purchasesPage").style.display="flex";
+  document.getElementById("footerText").style.display="none";
+  updatePurchasesBadge(true);
+  renderPurchases();
+}
+
+function showHelp(){
+  hideAllPages();
+  document.getElementById("helpPage").style.display="flex";
+}
+
+function saveProfile(){
+  userProfile.username=document.getElementById("accountUsername").value.trim()||userProfile.username;
+  userProfile.desc=document.getElementById("accountDesc").value.trim()||"";
+  document.getElementById("username").innerText=userProfile.username||"Guest";
+  localStorage.setItem("arStoreProfile",JSON.stringify(userProfile));
+  if(isFirebaseReady() && auth.currentUser){
+    db.collection("profiles").doc(auth.currentUser.uid).set({
+      username: userProfile.username||"",
+      desc: userProfile.desc||"",
+      avatar: userProfile.avatar||"",
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, {merge:true}).catch(()=>{});
+  }
+}
+
+function changeAvatar(e){
+  const f=e.target.files[0];
+  if(f){
+    const r=new FileReader();
+    r.onload=()=>{
+      userProfile.avatar=r.result;
+      localStorage.setItem("arStoreProfile",JSON.stringify(userProfile));
+      document.getElementById("accountAvatar").src=r.result;
+      document.getElementById("userAvatar").src=r.result;
+      if(isFirebaseReady() && auth.currentUser){
+        db.collection("profiles").doc(auth.currentUser.uid).set({
+          avatar: userProfile.avatar||"",
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, {merge:true}).catch(()=>{});
+      }
+    };
+    r.readAsDataURL(f);
+  }
+}
+
+/* ========== STORE CATALOGUE - categories 1-5 show 3 products per category ========== */
+function openProducts(catId){
+  lastCategoryId=catId;
+  const grid=document.getElementById("productsGrid");
+  const prods=CATEGORY_PRODUCTS[catId]||[PRODUCTS[catId-1],PRODUCTS[catId%5],PRODUCTS[(catId)%5]];
+  const q=(document.getElementById("topbarSearch")?.value||"").trim().toLowerCase();
+  const filtered = q ? prods.filter(p => String(p.name||"").toLowerCase().includes(q)) : prods;
+  grid.innerHTML=filtered.map((prod,i)=>{
+    const cls=i===1?"big":"small";
+    return `<div class="product-card ${cls}" onclick="playClick();openProductDetailByIndex(${catId},${i})">
+      <img src="${prod.img}" alt="${prod.name}">
+      <div class="product-info">
+        <div class="product-name">${prod.name}</div>
+        <div class="product-price">${prod.price} MAD</div>
+      </div>
+    </div>`;
+  }).join("");
+  hideAllPages();
+  document.getElementById("productsPage").style.display="flex";
+  document.getElementById("footerText").style.display="none";
+}
+
+/* ========== PRODUCT DETAIL - Slider, form, WhatsApp/Buy ========== */
+function openProductDetailByIndex(catId,idx){
+  const prods=CATEGORY_PRODUCTS[catId];
+  if(!prods||!prods[idx])return;
+  currentProduct=prods[idx];
+  showProductDetailPage();
+}
+function openProductDetail(productId){
+  currentProduct=PRODUCTS[productId-1];
+  if(!currentProduct)return;
+  showProductDetailPage();
+}
+function showProductDetailPage(){
+  if(!currentProduct)return;
+  const imgs=getSliderImages(currentProduct.img);
+  const main=document.getElementById("sliderMain");
+  main.innerHTML=`<div class="slider-track" id="sliderTrack">${imgs.map((src)=>`<img src="${src}" alt="${currentProduct.name}">`).join("")}</div>`;
+  document.getElementById("detailProductName").textContent=currentProduct.name;
+  document.getElementById("detailPrice").textContent=currentProduct.price+" MAD";
+  document.getElementById("detailDesc").textContent=currentProduct.desc||"";
+  document.getElementById("detailDesc").style.display=(currentProduct.desc?"block":"none");
+  renderProductReviews();
+  document.getElementById("detailQty").value=1;
+  ["detailName","detailCity","detailPhone"].forEach(id=>{const el=document.getElementById(id);if(el)el.value=""});
+  sliderIndex=0;
+  updateSliderPosition(true);
+  hideAllPages();
+  document.getElementById("productDetailPage").style.display="flex";
+  document.getElementById("footerText").style.display="none";
+  applyTranslations();
+}
+
+function slidePrev(){
+  const track=document.getElementById("sliderTrack");
+  if(!track)return;
+  const count=track.querySelectorAll("img").length;
+  if(count<=1)return;
+  sliderIndex=(sliderIndex-1+count)%count;
+  updateSliderPosition();
+}
+
+function slideNext(){
+  const track=document.getElementById("sliderTrack");
+  if(!track)return;
+  const count=track.querySelectorAll("img").length;
+  if(count<=1)return;
+  sliderIndex=(sliderIndex+1)%count;
+  updateSliderPosition();
+}
+
+function updateSliderPosition(skipAnim){
+  const track=document.getElementById("sliderTrack");
+  if(!track)return;
+  if(skipAnim) track.style.transition="none";
+  track.style.transform=`translateX(-${sliderIndex*33.3333}%)`;
+  if(skipAnim){
+    requestAnimationFrame(()=>{ track.style.transition="transform 0.55s cubic-bezier(.2,.85,.25,1)"; });
+  }
+}
+
+function renderProductReviews(){
+  const wrap=document.getElementById("productReviews");
+  if(!wrap || !currentProduct) return;
+
+  // Default (local mock) while Firebase loads / not configured
+  const fallback = PRODUCT_REVIEWS[currentProduct.name] || {rating:4.7, count: 42, comments:[
+    {user:"User", time:"1w", text:"Excellent quality and premium feel."},
+    {user:"User", time:"2w", text:"Fast service. Looks luxurious."},
+    {user:"User", time:"1m", text:"Highly recommended."}
+  ]};
+
+  const state = {rating:fallback.rating, count:fallback.count, comments:fallback.comments};
+  const fullStars = Math.floor(state.rating);
+  const half = (state.rating - fullStars) >= 0.5;
+  const stars = Array.from({length:5}).map((_,i)=>{
+    const on = i < fullStars;
+    const halfStar = !on && half && i === fullStars;
+    return `<span class="star" aria-hidden="true">${on ? "★" : (halfStar ? "★" : "☆")}</span>`;
+  }).join("");
+
+  // Share buttons (consistent with existing button styles)
+  const shareTitle = currentLang==="ar"?"مشاركة":currentLang==="fr"?"Partager":"Share";
+  const shareWhats = currentLang==="ar"?"واتساب":currentLang==="fr"?"WhatsApp":"WhatsApp";
+  const shareFb = "Facebook";
+  const shareIg = "Instagram";
+
+  wrap.innerHTML = `
+    <div class="rating-row">
+      <div class="stars" aria-label="${state.rating} out of 5">${stars}</div>
+      <div class="rating-meta">${state.rating} (${state.count})</div>
+    </div>
+    <div class="comment-list">
+      ${state.comments.slice(0,3).map(c=>`
+        <div class="comment">
+          <div class="comment-head">
+            <div class="comment-user">${c.user}</div>
+            <div class="comment-time">${c.time}</div>
+          </div>
+          <div class="comment-text">${c.text}</div>
+        </div>
+      `).join("")}
+    </div>
+    <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;justify-content:center;">
+      <button class="detail-btn secondary-link" type="button" onclick="playClick();shareCurrentProduct('whatsapp')">${shareTitle} • ${shareWhats}</button>
+      <button class="detail-btn secondary-link" type="button" onclick="playClick();shareCurrentProduct('facebook')">${shareTitle} • ${shareFb}</button>
+      <button class="detail-btn secondary-link" type="button" onclick="playClick();shareCurrentProduct('instagram')">${shareTitle} • ${shareIg}</button>
+    </div>
+    <div style="margin-top:12px;">
+      <div style="font-size:13px;font-weight:700;color:#1a1a1a;margin-bottom:8px;">
+        ${currentLang==="ar"?"أضف مراجعة":currentLang==="fr"?"Ajouter un avis":"Add a review"}
+      </div>
+      <input type="number" id="reviewRating" min="1" max="5" value="5" style="width:100%;margin:0 0 10px 0;">
+      <input type="text" id="reviewText" placeholder="${currentLang==="ar"?"اكتب تعليقك":currentLang==="fr"?"Écrivez votre commentaire":"Write your comment"}" style="width:100%;margin:0 0 10px 0;">
+      <button class="detail-btn buy" type="button" onclick="playClick();submitReview()">${currentLang==="ar"?"إرسال":currentLang==="fr"?"Envoyer":"Submit"}</button>
+    </div>
+  `;
+
+  // If Firebase is configured, hydrate reviews from Firestore (keeps same container/styles)
+  if(isFirebaseReady()){
+    loadFirestoreReviews().catch(()=>{});
+  }
+}
+
+async function loadFirestoreReviews(){
+  if(!isFirebaseReady() || !currentProduct) return;
+  const pid = productIdFrom(currentProduct);
+  const snap = await db.collection("products").doc(pid).collection("reviews")
+    .orderBy("createdAt","desc")
+    .limit(3)
+    .get();
+  const comments = snap.docs.map(d=>{
+    const data = d.data()||{};
+    return {
+      user: data.username || "User",
+      time: data.timeLabel || "",
+      text: data.text || ""
+    };
+  }).filter(c=>c.text);
+
+  // Keep stars/meta as-is; just update list if we have data
+  if(comments.length){
+    const list = document.querySelector("#productReviews .comment-list");
+    if(list){
+      list.innerHTML = comments.map(c=>`
+        <div class="comment">
+          <div class="comment-head">
+            <div class="comment-user">${c.user}</div>
+            <div class="comment-time">${c.time}</div>
+          </div>
+          <div class="comment-text">${c.text}</div>
+        </div>
+      `).join("");
+    }
+  }
+}
+
+async function submitReview(){
+  if(!currentProduct) return;
+  const text = String(document.getElementById("reviewText")?.value||"").trim();
+  const rating = Math.max(1, Math.min(5, parseInt(document.getElementById("reviewRating")?.value)||5));
+  if(!text){
+    showToast(currentLang==="ar"?"يرجى كتابة تعليق":currentLang==="fr"?"Veuillez écrire un commentaire":"Please write a comment");
+    return;
+  }
+  const ok = await ensureSignedInOrToast();
+  if(!ok) return;
+
+  if(isFirebaseReady()){
+    const u = auth.currentUser;
+    const pid = productIdFrom(currentProduct);
+    const username = userProfile.username || u?.displayName || (u?.email||"User").split("@")[0];
+    await db.collection("products").doc(pid).set({
+      name: currentProduct.name,
+      img: currentProduct.img,
+      price: currentProduct.price,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, {merge:true});
+    await db.collection("products").doc(pid).collection("reviews").add({
+      uid: u.uid,
+      username,
+      rating,
+      text,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      timeLabel: "now"
+    });
+    document.getElementById("reviewText").value="";
+    showToast(currentLang==="ar"?"تم إرسال المراجعة":currentLang==="fr"?"Avis envoyé":"Review submitted");
+    await loadFirestoreReviews();
+    return;
+  }
+
+  // Local fallback: append to mock
+  const name = currentProduct.name;
+  PRODUCT_REVIEWS[name] = PRODUCT_REVIEWS[name] || {rating:4.7, count:0, comments:[]};
+  PRODUCT_REVIEWS[name].comments.unshift({user:userProfile.username||"User", time:"now", text});
+  PRODUCT_REVIEWS[name].count = (PRODUCT_REVIEWS[name].count||0) + 1;
+  document.getElementById("reviewText").value="";
+  renderProductReviews();
+}
+
+function sendWhatsAppOrder(){
+  const name=document.getElementById("detailName").value.trim();
+  const city=document.getElementById("detailCity").value.trim();
+  const phone=document.getElementById("detailPhone").value.trim();
+  const qty=parseInt(document.getElementById("detailQty").value)||1;
+  const msg=`*Order from AR Store*%0A%0AProduct: ${currentProduct.name}%0APrice: ${currentProduct.price} MAD%0AQuantity: ${qty}%0ATotal: ${currentProduct.price*qty} MAD%0ADescription: ${(currentProduct.desc||"")}%0A%0AName: ${name}%0ACity: ${city}%0APhone: ${phone}`;
+  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`,"_blank");
+}
+
+function placeOrder(){
+  const name=document.getElementById("detailName").value.trim();
+  const city=document.getElementById("detailCity").value.trim();
+  const phone=document.getElementById("detailPhone").value.trim();
+  const qty=parseInt(document.getElementById("detailQty").value)||1;
+  const total=currentProduct.price*qty;
+
+  // Add to cart (multi-item) using existing flow/button, then go to cart page.
+  const item = {...currentProduct, quantity: qty, total, name, city, phone, addedAt: Date.now()};
+  cartItems.push(item);
+  localStorage.setItem("arStorePurchases",JSON.stringify(cartItems));
+  updatePurchasesBadge(false);
+  showToast(currentLang==="ar"?"تمت إضافة المنتج إلى السلة":currentLang==="fr"?"Ajouté au panier":"Added to cart");
+
+  // Persist cart to Firestore (if available)
+  if(isFirebaseReady() && auth.currentUser){
+    const u = auth.currentUser;
+    const pid = productIdFrom(currentProduct);
+    db.collection("carts").doc(u.uid).collection("items").add({
+      productId: pid,
+      name: currentProduct.name,
+      img: currentProduct.img,
+      price: currentProduct.price,
+      qty,
+      customer: {name, city, phone},
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).catch(()=>{});
+  }
+
+  showPurchases(); // reuse purchases page as cart manager without layout changes
+}
+
+function showOrderNotification(){
+  const notif=document.getElementById("orderNotification");
+  notif.classList.add("show");
+  setTimeout(()=>notif.classList.remove("show"),4000);
+}
+
+function renderPurchases(){
+  const list=document.getElementById("purchasesList");
+  const empty=document.getElementById("purchasesEmpty");
+  const buyAllWrap=document.getElementById("purchasesBuyAllWrap");
+  const counterEl=document.getElementById("purchasesCounter");
+  const delTxt=currentLang==="ar"?"حذف":currentLang==="fr"?"Supprimer":"Delete";
+  if(cartItems.length===0){
+    list.innerHTML="";
+    empty.style.display="block";
+    buyAllWrap.style.display="none";
+    counterEl.textContent="0";
+    empty.textContent=currentLang==="ar"?"لا توجد مشتريات بعد":currentLang==="fr"?"Aucun achat pour le moment":"No purchases yet";
+    return;
+  }
+  empty.style.display="none";
+  buyAllWrap.style.display="flex";
+  counterEl.textContent=cartItems.length;
+  let totalAll=0;
+  list.innerHTML=cartItems.map((p,idx)=>{
+    const qty = (p.quantity||1);
+    const t=(p.price*qty);
+    totalAll+=t;
+    return `<div class="purchase-card" data-idx="${idx}">
+      <img src="${p.img}" alt="${p.name}">
+      <div class="purchase-details">
+        <div class="purchase-name">${p.name}</div>
+        <div class="purchase-price">${p.price} MAD</div>
+        <div class="purchase-quantity">${currentLang==="ar"?"الكمية":currentLang==="fr"?"Quantité":"Quantity"}: 
+          <input type="number" min="1" value="${qty}" style="width:90px;padding:8px 10px;border-radius:10px;border:1px solid #ddd;font-size:14px;" onchange="updateCartQty(${idx}, this.value)">
+        </div>
+        <div class="purchase-total">${t} MAD</div>
+      </div>
+      <button class="purchase-delete" onclick="playClick();deletePurchase(${idx})">${delTxt}</button>
+    </div>`;
+  }).join("");
+}
+
+function deletePurchase(idx){
+  cartItems.splice(idx,1);
+  localStorage.setItem("arStorePurchases",JSON.stringify(cartItems));
+  updatePurchasesBadge(true);
+  renderPurchases();
+}
+
+function updateCartQty(idx, value){
+  const qty = Math.max(1, parseInt(value)||1);
+  if(!cartItems[idx]) return;
+  cartItems[idx].quantity = qty;
+  cartItems[idx].total = (cartItems[idx].price||0) * qty;
+  localStorage.setItem("arStorePurchases",JSON.stringify(cartItems));
+  updatePurchasesBadge(true);
+  renderPurchases();
+}
+
+function buyAllWhatsApp(){
+  if(cartItems.length===0)return;
+  let total=0;
+  let msg=`*Order from AR Store - All Items*%0A%0A`;
+  cartItems.forEach(p=>{
+    const t=(p.price*(p.quantity||1));
+    total+=t;
+    msg+=`- ${p.name}: ${p.price} MAD x ${p.quantity||1} = ${t} MAD%0A`;
+  });
+  msg+=`%0A*Total: ${total} MAD*`;
+  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`,"_blank");
+}
+
+function buyAllGmail(){
+  if(cartItems.length===0)return;
+  let total=0;
+  let body=`AR Store - Order (Multiple Items)\n\n`;
+  cartItems.forEach(p=>{
+    const t=(p.price*(p.quantity||1));
+    total+=t;
+    body+=`- ${p.name}: ${p.price} MAD x ${p.quantity||1} = ${t} MAD\n`;
+  });
+  body+=`\nTotal: ${total} MAD`;
+  window.location.href=`mailto:${STORE_EMAIL}?subject=${encodeURIComponent("AR Store - Full Order")}&body=${encodeURIComponent(body)}`;
+}
+
+function backToProducts(){
+  hideAllPages();
+  document.getElementById("productsPage").style.display="flex";
+}
+
+function backToStore(){
+  hideAllPages();
+  document.getElementById("storeSection").style.display="flex";
+  document.getElementById("footerText").style.display="block";
+  updatePurchasesBadge(false);
+}
+
+function googleLogin(){
+  if(isFirebaseReady()){
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider).then((cred)=>{
+      localStorage.setItem(SESSION_KEY, JSON.stringify({mode:"user"}));
+      applyAuthedUI(cred.user);
+      document.getElementById("loginSection").style.display="none";
+      document.getElementById("signInModal").style.display="none";
+      document.getElementById("createModal").style.display="none";
+      showWelcome();
+    }).catch(()=>{
+      alert(currentLang==="ar"?"تعذر تسجيل الدخول عبر Google":currentLang==="fr"?"Connexion Google impossible":"Google login failed");
+    });
+    return;
+  }
+  window.location.href="https://accounts.google.com/";
+}
+
+function applyAuthedUI(user){
+  const displayName = user?.displayName || userProfile.username || (user?.email||"Guest").split("@")[0] || "Guest";
+  userProfile.username = displayName;
+  document.getElementById("username").innerText = displayName;
+  if(user?.photoURL){
+    userProfile.avatar = user.photoURL;
+  }
+  document.getElementById("userAvatar").src = userProfile.avatar || "gust.png";
+  localStorage.setItem("arStoreProfile", JSON.stringify(userProfile));
+
+  if(isFirebaseReady() && user?.uid){
+    db.collection("profiles").doc(user.uid).get().then((d)=>{
+      if(!d.exists) return;
+      const p = d.data()||{};
+      if(p.username){ userProfile.username=p.username; document.getElementById("username").innerText=p.username; }
+      if(p.avatar){ userProfile.avatar=p.avatar; document.getElementById("userAvatar").src=p.avatar; }
+      if(p.desc){ userProfile.desc=p.desc; }
+      localStorage.setItem("arStoreProfile", JSON.stringify(userProfile));
+    }).catch(()=>{});
+  }
+}
+
+function shareCurrentProduct(platform){
+  if(!currentProduct) return;
+  const text = `AR STORE - ${currentProduct.name} (${currentProduct.price} MAD)`;
+  const url = window.location.href.split("#")[0];
+  const shareUrl = `${url}#product=${encodeURIComponent(productIdFrom(currentProduct))}`;
+  if(platform==="whatsapp"){
+    window.open(`https://wa.me/?text=${encodeURIComponent(text + "\n" + shareUrl)}`,"_blank");
+    return;
+  }
+  if(platform==="facebook"){
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,"_blank");
+    return;
+  }
+  if(platform==="instagram"){
+    // Instagram doesn't support direct web share URLs; copy link as best UX without changing layout.
+    try{ navigator.clipboard.writeText(shareUrl); }catch(e){}
+    showToast(currentLang==="ar"?"تم نسخ رابط المشاركة":currentLang==="fr"?"Lien copié":"Share link copied");
+    return;
+  }
+}
+
+/* ========== TRANSLATIONS - Arabic, French, English ========== */
+const TRANSLATIONS = {
+  en:{
+    login:"LOGIN",guest:"Continue as Guest",guestBtn:"Guest",continue:"Continue",back:"Back",acc:"My Account",help:"Help",
+    store:"Store",purchases:"My Purchases",signIn:"Sign In",email:"Email",password:"Password",
+    createAcc:"Create Account",createTitle:"Create Account",fullName:"Full Name",createSubmit:"Continue",
+    createAvatarLabel:"Choose picture",googleLogin:"Login with Google",
+    footer:"© 2026 Mondir Aghbalou — All rights reserved",
+    welcomeTitle:"Welcome to My Store",welcomeBrand:"Mondir AR",artworksLabel:"Artworks",
+    cat1:"Parfum",cat2:"Electronics",cat3:"Clothing",cat4:"Watches",cat5:"Shoes",
+    name:"Name",city:"City",phone:"Phone Number",quantity:"Quantity",
+    whatsappBtn:"Order via WhatsApp",buyBtn:"Buy",detailBack:"Back to Store",myPurchases:"My Purchases",
+    helpTitle:"Help & Support",helpSupport:"We are always at your service",
+    purchasesEmpty:"No purchases yet",purchasesTitle:"My Purchases",username:"Username",description:"Description",
+    accountSave:"Save",accountGmail:"Contact Gmail",
+    buyAllWhatsApp:"Buy All via WhatsApp",buyAllGmail:"Buy All via Gmail",
+    orderConfirm:"Your order has been confirmed. The store admin will contact you."
+  },
+  ar:{
+    login:"تسجيل الدخول",guest:"الدخول كضيف",guestBtn:"ضيف",continue:"متابعة",back:"رجوع",acc:"حسابي",help:"مساعدة",
+    store:"المتجر",purchases:"مشترياتي",signIn:"تسجيل الدخول",email:"البريد الإلكتروني",password:"كلمة المرور",
+    createAcc:"إنشاء حساب",createTitle:"إنشاء حساب",fullName:"الاسم الكامل",createSubmit:"متابعة",
+    createAvatarLabel:"اختر صورة",googleLogin:"الدخول عبر Google",
+    footer:"© 2026 Mondir Aghbalou — جميع الحقوق محفوظة",
+    welcomeTitle:"مرحباً بكم في متجري",welcomeBrand:"Mondir AR",artworksLabel:"أعمال فنية",
+    cat1:"حقائب",cat2:"إلكترونيات",cat3:"ملابس",cat4:"ساعات",cat5:"أحذية",
+    name:"الاسم",city:"المدينة",phone:"رقم الهاتف",quantity:"الكمية",
+    whatsappBtn:"طلب عبر واتساب",buyBtn:"شراء",detailBack:"العودة للمتجر",myPurchases:"مشترياتي",
+    helpTitle:"المساعدة والدعم",helpSupport:"نحن دائما في خدمتكم",
+    purchasesEmpty:"لا توجد مشتريات بعد",purchasesTitle:"مشترياتي",username:"اسم المستخدم",description:"الوصف",
+    accountSave:"حفظ",accountGmail:"التواصل عبر Gmail",
+    buyAllWhatsApp:"شراء الكل عبر واتساب",buyAllGmail:"شراء الكل عبر Gmail",
+    orderConfirm:"تم تأكيد طلبك. سيتواصل معك مسؤول المتجر."
+  },
+  fr:{
+    login:"Connexion",guest:"Continuer en invité",guestBtn:"Invité",continue:"Continuer",back:"Retour",acc:"Mon Compte",help:"Aide",
+    store:"Boutique",purchases:"Mes Achats",signIn:"Connexion",email:"Email",password:"Mot de passe",
+    createAcc:"Créer un compte",createTitle:"Créer un compte",fullName:"Nom complet",createSubmit:"Continuer",
+    createAvatarLabel:"Choisir une photo",googleLogin:"Connexion avec Google",
+    footer:"© 2026 Mondir Aghbalou — Tous droits réservés",
+    welcomeTitle:"Bienvenue dans ma boutique",welcomeBrand:"Mondir AR",artworksLabel:"Œuvres d'art",
+    cat1:"Parfum",cat2:"Électronique",cat3:"Vêtements",cat4:"Montres",cat5:"Chaussures",
+    name:"Nom",city:"Ville",phone:"Numéro de téléphone",quantity:"Quantité",
+    whatsappBtn:"Commander via WhatsApp",buyBtn:"Acheter",detailBack:"Retour à la boutique",myPurchases:"Mes Achats",
+    helpTitle:"Aide et support",helpSupport:"Nous sommes toujours à votre service",
+    purchasesEmpty:"Aucun achat pour le moment",purchasesTitle:"Mes Achats",username:"Nom d'utilisateur",description:"Description",
+    accountSave:"Enregistrer",accountGmail:"Contact Gmail",
+    buyAllWhatsApp:"Tout acheter via WhatsApp",buyAllGmail:"Tout acheter via Gmail",
+    orderConfirm:"Votre commande a été confirmée. L'administrateur du magasin vous contactera."
+  }
+};
+
+function setText(id,val){ const el=document.getElementById(id); if(el)el.innerText=val; }
+function setPlaceholder(id,val){ const el=document.getElementById(id); if(el)el.placeholder=val; }
+function applyTranslations(){
+  const t=TRANSLATIONS[currentLang];
+  setText("loginText",t.login);
+  setText("guestBtnText",t.guestBtn);
+  setText("loginWelcomeTitle",t.welcomeTitle);
+  setText("loginBrand",t.welcomeBrand);
+  setText("guestText",t.guest);
+  setText("continueText",t.continue);
+  setText("backText",t.back);
+  setText("myAcc",t.acc);
+  setText("help",t.help);
+  setText("storeText",t.store);
+  setText("myPurchasesText",t.purchases);
+  setText("signTitle",t.signIn);
+  setPlaceholder("emailInput",t.email);
+  setPlaceholder("passInput",t.password);
+  setText("createAccText",t.createAcc);
+  setText("createTitle",t.createTitle);
+  setText("createAvatarLabelText",t.createAvatarLabel);
+  setPlaceholder("createName",t.fullName);
+  setPlaceholder("createEmail",t.email);
+  setPlaceholder("createPass",t.password);
+  setPlaceholder("createDesc",t.description);
+  setText("createSubmitText",t.createSubmit);
+  setText("signInBackText",t.back);
+  setText("createBackText",t.back);
+  setText("googleLoginText",t.googleLogin);
+  setText("footerText",t.footer);
+  setText("welcomeTitle",t.welcomeTitle);
+  setText("welcomeBrand",t.welcomeBrand);
+  setText("artworksLabel",t.artworksLabel);
+  setText("cat1",t.cat1);
+  setText("cat2",t.cat2);
+  setText("cat3",t.cat3);
+  setText("cat4",t.cat4);
+  setText("cat5",t.cat5);
+  setPlaceholder("detailName",t.name);
+  setPlaceholder("detailCity",t.city);
+  setPlaceholder("detailPhone",t.phone);
+  setPlaceholder("detailQty",t.quantity);
+  setText("whatsappBtn",t.whatsappBtn);
+  setText("buyBtn",t.buyBtn);
+  setText("detailBackBtn",t.detailBack);
+  setText("detailBackText",t.back);
+  setText("detailMyPurchasesBtn",t.myPurchases);
+  setText("helpTitle",t.helpTitle);
+  setText("helpSupportText",t.helpSupport);
+  setText("helpBackText",t.back);
+  setText("purchasesBackText",t.back);
+  setText("purchasesTitle",t.purchasesTitle);
+  setText("buyAllWhatsAppBtn",t.buyAllWhatsApp);
+  setText("buyAllGmailBtn",t.buyAllGmail);
+  setText("accountBackText",t.back);
+  setPlaceholder("accountUsername",t.username);
+  setPlaceholder("accountDesc",t.description);
+  setText("accountSaveText",t.accountSave);
+  setText("accountGmailText",t.accountGmail);
+  setText("orderNotifText",t.orderConfirm);
+}
+
+function setLang(lang){
+  currentLang=lang;
+  document.documentElement.lang=lang==="ar"?"ar":lang==="fr"?"fr":"en";
+  document.body.style.direction=lang==="ar"?"rtl":"ltr";
+  applyTranslations();
+  if(document.getElementById("purchasesPage").style.display==="flex")renderPurchases();
+}
+
+/* ========== TOPBAR SEARCH (filters product grid) ========== */
+function onTopbarSearchInput(e){
+  const val=String(e?.target?.value||"");
+  const wrap=document.getElementById("topbarSearchWrap");
+  if(wrap) wrap.classList.toggle("has-value", val.trim().length>0);
+  if(document.getElementById("productsPage").style.display==="flex"){
+    openProducts(lastCategoryId);
+  }
+}
+function clearTopbarSearch(){
+  const input=document.getElementById("topbarSearch");
+  if(input) input.value="";
+  const wrap=document.getElementById("topbarSearchWrap");
+  if(wrap) wrap.classList.remove("has-value");
+  if(document.getElementById("productsPage").style.display==="flex"){
+    openProducts(lastCategoryId);
+  }
+}
+
+/* Init */
+applyTranslations();
+
+// Auto-resume session (guest or user)
+(function initSession(){
+  try{
+    const s=JSON.parse(localStorage.getItem(SESSION_KEY)||"null");
+    if(!s) return;
+    document.getElementById("loginSection").style.display="none";
+    document.getElementById("signInModal").style.display="none";
+    document.getElementById("createModal").style.display="none";
+    if(s.mode==="guest"){
+      document.getElementById("username").innerText="Guest";
+      document.getElementById("userAvatar").src="gust.png";
+      showStore();
+      return;
+    }
+    document.getElementById("username").innerText=userProfile.username||"Guest";
+    document.getElementById("userAvatar").src=userProfile.avatar||"gust.png";
+
+    if(isFirebaseReady()){
+      auth.onAuthStateChanged((u)=>{
+        if(u){
+          applyAuthedUI(u);
+        }
+      });
+    }
+    showStore();
+  }catch(e){}
+})();
+</script>
+</body>
+</html>

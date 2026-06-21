@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AR STORE • Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./admin.css?v=8" />
+</head>
+<body>
+  <div class="admin-shell" id="appShell" style="display:none;">
+    <aside class="admin-sidebar" id="adminSidebar">
+      <div class="admin-brand">
+        <img src="../ar-store-logo.png" alt="AR STORE" class="admin-brand-logo" id="adminBrandLogo" width="120" height="120" />
+        <div class="admin-brand-subtitle">Admin Dashboard</div>
+      </div>
+
+      <nav class="admin-nav" id="adminNav">
+        <button class="nav-item active" data-page="overview"><span class="nav-ico">📊</span><span>Overview</span></button>
+        <button class="nav-item" data-page="orders"><span class="nav-ico">📦</span><span>Orders</span></button>
+        <button class="nav-item" data-page="products"><span class="nav-ico">🏷️</span><span>Products</span></button>
+        <button class="nav-item" data-page="analytics"><span class="nav-ico">📈</span><span>Analytics</span></button>
+        <button class="nav-item" data-page="ai"><span class="nav-ico">🤖</span><span>AI Assistant</span></button>
+        <button class="nav-item" data-page="users"><span class="nav-ico">👥</span><span>Customers</span></button>
+        <button class="nav-item" data-page="reviews"><span class="nav-ico">💬</span><span>Reviews</span></button>
+        <button class="nav-item" data-page="settings"><span class="nav-ico">⚙️</span><span>Settings</span></button>
+      </nav>
+
+      <div class="admin-sidebar-footer">
+        <a class="link" href="../index.html">← Back to store</a>
+        <button class="btn danger small" id="logoutBtn" type="button">Logout</button>
+      </div>
+    </aside>
+
+    <main class="admin-main">
+      <header class="admin-topbar">
+        <div class="topbar-left">
+          <button type="button" class="admin-back-btn" id="adminBackBtn" title="Back">← Back</button>
+          <button type="button" class="sidebar-toggle" id="sidebarToggle" aria-label="Menu">☰</button>
+          <div class="topbar-titles">
+            <div class="topbar-title" id="pageTitle">Overview</div>
+            <div class="topbar-subtitle" id="pageSubtitle">Store insights & quick actions</div>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="pill" id="adminUserPill">admin</div>
+        </div>
+      </header>
+
+      <section class="admin-content">
+        <!-- OVERVIEW -->
+        <div class="page active" id="page-overview">
+          <div class="kpi-grid">
+            <div class="kpi-card"><div class="kpi-label">Total Orders</div><div class="kpi-value" id="kpiOrders">0</div></div>
+            <div class="kpi-card"><div class="kpi-label">Customers</div><div class="kpi-value" id="kpiUsers">0</div></div>
+            <div class="kpi-card"><div class="kpi-label">Products</div><div class="kpi-value" id="kpiProducts">0</div></div>
+            <div class="kpi-card"><div class="kpi-label">Revenue (MAD)</div><div class="kpi-value" id="kpiRevenue">0</div></div>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">Recent Orders</div>
+              <div class="card-body">
+                <div class="empty" id="recentOrdersEmpty">No orders yet.</div>
+                <div class="list" id="recentOrdersList"></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">Quick Actions</div>
+              <div class="card-body">
+                <div class="actions">
+                  <button class="btn" type="button" id="qaAddProduct">Add product</button>
+                  <button class="btn secondary" type="button" id="qaOpenOrders">View orders</button>
+                  <button class="btn secondary" type="button" id="qaOpenAnalytics">Analytics</button>
+                  <button class="btn secondary" type="button" id="qaOpenSettings">Store settings</button>
+                </div>
+                <div class="hint">Full control of your storefront — products, images and settings sync live via the server (PC + phone).</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ORDERS -->
+        <div class="page" id="page-orders">
+          <div class="toolbar">
+            <div class="toolbar-left">
+              <input class="input" id="ordersSearch" placeholder="Search by customer / product / id" />
+            </div>
+            <div class="toolbar-right">
+              <select class="input" id="ordersStatusFilter">
+                <option value="">All statuses</option>
+                <option value="pending">Pending</option>
+                <option value="in_delivery">Shipped</option>
+                <option value="delivered">Delivered</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+              <button class="btn secondary small" type="button" id="ordersExportBtn">Export CSV</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Orders</div>
+            <div class="card-body table-wrap">
+              <div class="table-scroll-hint">Swipe left/right to see all columns</div>
+              <div class="empty" id="ordersEmpty">No orders found.</div>
+              <div class="table" id="ordersTable"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ORDER DETAILS MODAL -->
+        <div class="modal" id="orderDetailModal" style="display:none;">
+          <div class="modal-card">
+            <div class="modal-head">
+              <div>
+                <div class="modal-title">Order details</div>
+                <div class="modal-subtitle" id="orderDetailSub">—</div>
+              </div>
+              <button class="btn secondary small" type="button" id="orderDetailClose">Close</button>
+            </div>
+            <div class="modal-body" id="orderDetailBody"></div>
+          </div>
+        </div>
+
+        <!-- PRODUCTS — Zara-style: Catalogues → Products → Edit -->
+        <div class="page" id="page-products">
+          <div class="prod-toolbar">
+            <div class="prod-toolbar-left">
+              <div class="prod-breadcrumb" id="prodBreadcrumb">Catalogues</div>
+              <input class="input prod-search" id="prodSearchInput" placeholder="Search…" style="display:none;" />
+            </div>
+            <div class="prod-toolbar-right">
+              <label class="prod-toggle" title="Product cards on store cycle through photos before opening detail">
+                <input type="checkbox" id="productCardSlideshow" />
+                <span>Store card slideshow</span>
+              </label>
+              <button class="btn secondary small" type="button" id="productsExportJson">Export</button>
+              <label class="btn secondary small file-btn">
+                Import
+                <input type="file" id="productsImportFile" accept="application/json,.json" hidden />
+              </label>
+            </div>
+          </div>
+
+          <!-- Level 1: Catalogues grid -->
+          <div class="prod-view active" id="prodViewCatalogues">
+            <div class="prod-view-head">
+              <div>
+                <h2 class="prod-view-title">Catalogues</h2>
+                <p class="prod-view-sub">Tap a catalogue to manage its products · appears on storefront</p>
+              </div>
+              <button class="btn" type="button" id="prodAddCatalogue">+ Add Catalogue</button>
+            </div>
+            <div class="empty" id="cataloguesEmpty">No catalogues yet. Add your first catalogue.</div>
+            <div class="zara-grid" id="cataloguesGrid"></div>
+          </div>
+
+          <!-- Level 2: Products inside catalogue -->
+          <div class="prod-view" id="prodViewCategory" style="display:none;">
+            <div class="prod-view-head">
+              <div>
+                <button class="btn secondary small prod-back-inline" type="button" id="prodBackCatalogues">← Catalogues</button>
+                <h2 class="prod-view-title" id="prodCategoryTitle">—</h2>
+                <p class="prod-view-sub" id="prodCategorySub">Products in this catalogue</p>
+              </div>
+              <button class="btn" type="button" id="prodAddProduct">+ Add Product</button>
+            </div>
+            <div class="empty" id="categoryProductsEmpty">No products in this catalogue.</div>
+            <div class="zara-grid zara-grid-products" id="categoryProductsGrid"></div>
+          </div>
+
+          <!-- Level 3a: Catalogue form -->
+          <div class="prod-view" id="prodViewCatalogueForm" style="display:none;">
+            <div class="prod-form-shell">
+              <button class="btn secondary small prod-back-inline" type="button" id="catalogueFormBack">← Back</button>
+              <h2 class="prod-view-title" id="catalogueFormTitle">Add Catalogue</h2>
+              <form id="catalogueForm" class="form prod-form">
+                <div class="prod-form-cover" id="catalogueFormPreview">
+                  <span class="cover-placeholder">Cover image</span>
+                </div>
+                <div class="form-row">
+                  <label class="label">Catalogue name <span class="muted-inline">default / Arabic</span></label>
+                  <input class="input" id="catalogueFormName" required placeholder="e.g. Chef Food, Parfum…" />
+                </div>
+                <div class="form-row-2">
+                  <div class="form-row">
+                    <label class="label">Name (English)</label>
+                    <input class="input" id="catalogueFormNameEn" placeholder="English name" />
+                  </div>
+                  <div class="form-row">
+                    <label class="label">Name (Français)</label>
+                    <input class="input" id="catalogueFormNameFr" placeholder="Nom en français" />
+                  </div>
+                </div>
+                <div class="form-row">
+                  <label class="label">Cover image URL</label>
+                  <input class="input" id="catalogueFormImageUrl" placeholder="URL or upload below" />
+                </div>
+                <div class="form-row">
+                  <label class="btn secondary small file-btn">
+                    Upload cover
+                    <input type="file" id="catalogueFormUpload" accept="image/*" hidden />
+                  </label>
+                </div>
+                <div class="form-actions">
+                  <button class="btn" type="submit">Save catalogue</button>
+                  <button class="btn secondary" type="button" id="catalogueFormCancel">Cancel</button>
+                  <button class="btn danger" type="button" id="catalogueFormDelete" style="display:none;">Delete</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Level 3b: Product form -->
+          <div class="prod-view" id="prodViewProductForm" style="display:none;">
+            <div class="prod-form-shell">
+              <button class="btn secondary small prod-back-inline" type="button" id="productFormBack">← Back</button>
+              <h2 class="prod-view-title" id="productFormTitle">Add Product</h2>
+              <p class="prod-view-sub" id="productFormSub">Cost price is admin-only · not shown on store</p>
+              <form id="productForm" class="form prod-form">
+                <input type="hidden" id="productId" />
+                <input type="hidden" id="productCategory" />
+                <div class="form-row">
+                  <label class="label">Product name <span class="muted-inline">default / Arabic</span></label>
+                  <input class="input" id="productName" required />
+                </div>
+                <div class="form-row-2">
+                  <div class="form-row">
+                    <label class="label">Name (English)</label>
+                    <input class="input" id="productNameEn" placeholder="English name" />
+                  </div>
+                  <div class="form-row">
+                    <label class="label">Name (Français)</label>
+                    <input class="input" id="productNameFr" placeholder="Nom en français" />
+                  </div>
+                </div>
+                <div class="form-row-2">
+                  <div class="form-row">
+                    <label class="label">Selling price (MAD)</label>
+                    <input class="input" id="productPrice" type="number" min="0" step="1" required />
+                  </div>
+                  <div class="form-row">
+                    <label class="label">Cost price (MAD) <span class="muted-inline">admin only</span></label>
+                    <input class="input" id="productCostPrice" type="number" min="0" step="1" placeholder="0" />
+                  </div>
+                </div>
+                <div class="form-row">
+                  <label class="label">Stock quantity <span class="muted-inline">pieces available · 0 = unlimited</span></label>
+                  <input class="input" id="productStockMax" type="number" min="0" step="1" placeholder="0" />
+                </div>
+                <div class="form-row">
+                  <label class="label">Description</label>
+                  <textarea class="input" id="productDesc" rows="3"></textarea>
+                </div>
+                <div class="form-row">
+                  <label class="label">Video <span class="muted-inline">optional · URL or upload</span></label>
+                  <div class="img-add-row">
+                    <input class="input" id="productVideoUrl" placeholder="Video URL (YouTube, /uploads/…)" />
+                    <button class="btn secondary small" type="button" id="productVideoClear">Clear</button>
+                  </div>
+                  <label class="btn secondary small file-btn img-upload-btn">
+                    Upload video
+                    <input type="file" id="productVideoFile" accept="video/mp4,video/webm,video/quicktime" hidden />
+                  </label>
+                  <div class="hint" id="productVideoPreview"></div>
+                </div>
+                <div class="form-row">
+                  <label class="label">Photos <span class="muted-inline">first = main · ★ set main · used in store slider</span></label>
+                  <div class="img-add-row">
+                    <input class="input" id="productImageUrl" placeholder="Image URL" />
+                    <button class="btn secondary small" type="button" id="productImageUrlAdd">Add</button>
+                  </div>
+                  <label class="btn secondary small file-btn img-upload-btn">
+                    Upload photos (multiple)
+                    <input type="file" id="productImageFile" accept="image/*" multiple hidden />
+                  </label>
+                  <div class="img-gallery" id="productImagesGallery"></div>
+                </div>
+                <div class="form-actions">
+                  <button class="btn" type="submit" id="productSaveBtn">Save product</button>
+                  <button class="btn secondary" type="button" id="productResetBtn">Clear</button>
+                  <button class="btn danger" type="button" id="productDeleteBtn" style="display:none;">Delete</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- ANALYTICS -->
+        <div class="page" id="page-analytics">
+          <div class="toolbar">
+            <div class="toolbar-left">
+              <div class="segmented" aria-label="Time filter">
+                <button class="seg-btn" type="button" data-range="today">Today</button>
+                <button class="seg-btn active" type="button" data-range="7d">7 Days</button>
+                <button class="seg-btn" type="button" data-range="month">Monthly</button>
+                <button class="seg-btn" type="button" data-range="year">Yearly</button>
+              </div>
+            </div>
+            <div class="toolbar-right">
+              <input class="input input-compact" id="profitFrom" type="date" />
+              <input class="input input-compact" id="profitTo" type="date" />
+              <button class="btn secondary small" type="button" id="profitApplyCustom">Apply</button>
+            </div>
+          </div>
+          <div class="kpi-grid analytics-kpis" id="analyticsKpis"></div>
+          <div class="grid-2" style="margin-top:14px;">
+            <div class="card">
+              <div class="card-title">Charts</div>
+              <div class="card-body">
+                <div class="charts-grid">
+                  <div class="chart-card"><div class="chart-title">Profit over time</div><div class="chart" id="chartProfitLine"></div></div>
+                  <div class="chart-card"><div class="chart-title">Revenue vs Expenses</div><div class="chart" id="chartRevVsExp"></div></div>
+                  <div class="chart-card"><div class="chart-title">Revenue distribution</div><div class="chart" id="chartRevenueDist"></div></div>
+                  <div class="chart-card"><div class="chart-title">Growth trend</div><div class="chart" id="chartGrowthArea"></div></div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">Export Reports</div>
+              <div class="card-body">
+                <div class="actions">
+                  <button class="btn" type="button" id="exportPdf">PDF report</button>
+                  <button class="btn secondary" type="button" id="exportCsv">CSV</button>
+                  <button class="btn secondary" type="button" id="exportExcel">Excel</button>
+                </div>
+                <div class="hint">Exports use the selected time filter above.</div>
+              </div>
+            </div>
+          </div>
+          <div class="grid-2" style="margin-top:14px;">
+            <div class="card">
+              <div class="card-title">Product Profit</div>
+              <div class="card-body table-wrap">
+                <div class="toolbar" style="margin-bottom:10px;">
+                  <input class="input" id="profitProductSearch" placeholder="Search products" style="max-width:240px;" />
+                  <select class="input" id="profitProductSort" style="max-width:200px;">
+                    <option value="best_selling">Best selling</option>
+                    <option value="most_profitable">Most profitable</option>
+                    <option value="least_profitable">Least profitable</option>
+                  </select>
+                </div>
+                <div class="table" id="profitProductsTable"></div>
+                <div class="empty" id="profitProductsEmpty" style="display:none;">No product data for this range.</div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">Advertising & Losses</div>
+              <div class="card-body">
+                <div class="grid-2" style="margin-top:0;">
+                  <div class="mini-card">
+                    <div class="mini-title">Advertising</div>
+                    <div class="mini-meta" id="adsMeta">—</div>
+                    <button class="btn secondary small" type="button" id="addAdEntry" style="margin-top:10px;">Add entry</button>
+                  </div>
+                  <div class="mini-card">
+                    <div class="mini-title">Losses & Expenses</div>
+                    <div class="mini-meta" id="lossMeta">—</div>
+                    <button class="btn secondary small" type="button" id="addExpenseEntry" style="margin-top:10px;">Add expense</button>
+                  </div>
+                </div>
+                <div class="chart-card" style="margin-top:12px;"><div class="chart-title">Loss breakdown</div><div class="chart" id="chartLossBreakdown"></div></div>
+                <div class="chart-card" style="margin-top:12px;"><div class="chart-title">Payment breakdown</div><div class="chart" id="chartPaymentBreakdown"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI ASSISTANT -->
+        <div class="page" id="page-ai">
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">AI Summary</div>
+              <div class="card-body">
+                <div class="ai-summary" id="aiSummary"></div>
+                <div class="ai-risk" id="aiRisk"></div>
+                <div class="ai-alerts" id="aiAlerts"></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">Smart Insights</div>
+              <div class="card-body">
+                <div class="ai-insights" id="aiInsights"></div>
+              </div>
+            </div>
+          </div>
+          <div class="card" style="margin-top:14px;">
+            <div class="card-title">AI Chat</div>
+            <div class="card-body">
+              <div class="chat" id="aiChatLog"></div>
+              <div class="chat-input">
+                <input class="input" id="aiChatInput" placeholder="Ask: How much did I earn today? / Show monthly report / Why did profit drop?" />
+                <button class="btn" type="button" id="aiChatSend">Send</button>
+              </div>
+              <div class="hint">AI runs locally using your dashboard data — no external API required.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- USERS -->
+        <div class="page" id="page-users">
+          <div class="card">
+            <div class="card-title">Customers</div>
+            <div class="card-body table-wrap">
+              <input class="input" id="usersSearch" placeholder="Search by name or email" style="margin-bottom:12px;max-width:360px;" />
+              <div class="empty" id="usersEmpty">No customers found.</div>
+              <div class="table" id="usersTable"></div>
+              <div class="hint">From local accounts (<code>arStoreAccounts</code>). Firebase users require backend rules.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- REVIEWS -->
+        <div class="page" id="page-reviews">
+          <div class="toolbar">
+            <input class="input" id="reviewsSearch" placeholder="Search reviews by product / user / text" style="max-width:360px;" />
+            <button class="btn secondary small" type="button" id="reviewsRefresh">Refresh</button>
+          </div>
+          <div class="card">
+            <div class="card-title">Reviews & Comments</div>
+            <div class="card-body">
+              <div class="empty" id="reviewsEmpty">No reviews found.</div>
+              <div class="list" id="reviewsList"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SETTINGS -->
+        <div class="page" id="page-settings">
+          <div class="settings-layout">
+            <div class="settings-menu card">
+              <div class="card-title">Settings</div>
+              <div class="card-body">
+                <div class="settings-nav" role="tablist">
+                  <button class="settings-nav-btn active" type="button" data-settings-tab="store" role="tab">🏪 Store Info</button>
+                  <button class="settings-nav-btn" type="button" data-settings-tab="contact" role="tab">📞 Contact</button>
+                  <button class="settings-nav-btn" type="button" data-settings-tab="site" role="tab">🎨 Site Control</button>
+                  <button class="settings-nav-btn" type="button" data-settings-tab="admin" role="tab">🔐 Admin Access</button>
+                </div>
+              </div>
+            </div>
+            <div class="settings-panels">
+              <div class="settings-panel active" id="settingsPanel-store" data-settings-panel="store">
+                <div class="card">
+                  <div class="card-title">Store Info</div>
+                  <div class="card-body">
+                    <form id="settingsForm" class="form">
+                      <div class="form-row"><label class="label">Store name</label><input class="input" id="settingsStoreName" placeholder="AR STORE" /></div>
+                      <div class="form-row"><label class="label">Footer text</label><input class="input" id="settingsFooterText" placeholder="© 2026 …" /></div>
+                      <div class="form-actions"><button class="btn" type="submit">Save store info</button></div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+              <div class="settings-panel" id="settingsPanel-contact" data-settings-panel="contact">
+                <div class="card">
+                  <div class="card-title">Contact & Social</div>
+                  <div class="card-body">
+                    <form id="contactForm" class="form">
+                      <div class="form-row"><label class="label">WhatsApp number</label><input class="input" id="settingsWhatsapp" placeholder="212632592347" /></div>
+                      <div class="form-row"><label class="label">Gmail / Email</label><input class="input" id="settingsEmail" type="email" placeholder="store@gmail.com" /></div>
+                      <div class="form-row"><label class="label">Instagram URL</label><input class="input" id="settingsInstagram" placeholder="https://instagram.com/…" /></div>
+                      <div class="form-row"><label class="label">Support hours</label><input class="input" id="settingsSupportHours" placeholder="Mon–Sat 9:00–21:00" /></div>
+                      <div class="form-actions"><button class="btn" type="submit">Save contact</button></div>
+                    </form>
+                    <div class="hint">Used on the storefront Help page and order links.</div>
+                  </div>
+                </div>
+              </div>
+              <div class="settings-panel" id="settingsPanel-site" data-settings-panel="site">
+                <div class="card">
+                  <div class="card-title">Site Control — Visuals</div>
+                  <div class="card-body">
+                    <form id="siteForm" class="form">
+                      <div class="form-row"><label class="label">Login background (URL)</label><input class="input" id="settingsLoginBg" placeholder="Mondir.jpg" /></div>
+                      <div class="form-row"><label class="label">Store background (URL)</label><input class="input" id="settingsStoreBg" placeholder="AR.jpg" /></div>
+                      <div class="form-row">
+                        <label class="label">Catalog categories</label>
+                        <div class="hint" style="margin:0 0 8px;">Manage categories (name + cover) in <strong>Products → Catalog Categories</strong> at the top of the page.</div>
+                      </div>
+                      <div class="form-actions"><button class="btn" type="submit">Save visuals</button></div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+              <div class="settings-panel" id="settingsPanel-admin" data-settings-panel="admin">
+                <div class="card">
+                  <div class="card-title">Admin Access</div>
+                  <div class="card-body">
+                    <form id="adminCredsForm" class="form">
+                      <div class="form-row"><label class="label">Admin username</label><input class="input" id="adminCredsUser" autocomplete="username" /></div>
+                      <div class="form-row">
+                        <label class="label">New password</label>
+                        <div class="password-wrapper">
+                          <input class="input" id="adminCredsPass" type="password" autocomplete="new-password" placeholder="Leave empty to keep current" />
+                          <button type="button" class="password-toggle" id="adminCredsPassEye" aria-label="Show password" onclick="toggleAdminPassword('adminCredsPass','adminCredsPassEye')">👁</button>
+                        </div>
+                      </div>
+                      <div class="form-row">
+                        <label class="label">Confirm password</label>
+                        <div class="password-wrapper">
+                          <input class="input" id="adminCredsPass2" type="password" autocomplete="new-password" />
+                          <button type="button" class="password-toggle" id="adminCredsPass2Eye" aria-label="Show password" onclick="toggleAdminPassword('adminCredsPass2','adminCredsPass2Eye')">👁</button>
+                        </div>
+                      </div>
+                      <div class="form-actions">
+                        <button class="btn" type="submit">Update credentials</button>
+                        <button class="btn secondary" type="button" id="resetLoginLock">Reset login lock</button>
+                      </div>
+                    </form>
+                    <div class="hint">Keep credentials private. Change them here after first login.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
+    <nav class="mobile-admin-bar" id="mobileAdminBar" aria-label="Mobile navigation">
+      <button type="button" class="btn secondary small mobile-bar-btn" id="mobileMenuBtn">☰ Menu</button>
+      <button type="button" class="btn secondary small mobile-bar-btn" id="mobileBackBtn">← Back</button>
+      <button type="button" class="btn small mobile-bar-btn" id="mobileHomeBtn">Overview</button>
+    </nav>
+  </div>
+
+  <!-- LOGIN -->
+  <div class="auth-shell" id="authShell">
+    <div class="auth-card">
+      <div class="auth-badge">ADMIN PANEL</div>
+      <img src="../ar-store-logo.png" alt="AR STORE" class="auth-logo site-logo" width="160" height="160" />
+      <div class="auth-gold-line"></div>
+      <div class="auth-subtitle">Luxury Dashboard Access</div>
+        <form id="loginForm" class="form" style="margin-top:24px;" action="#" novalidate>
+        <div class="form-row"><label class="label">Username</label><input class="input" id="loginUser" autocomplete="username" placeholder="Username" required /></div>
+        <div class="form-row">
+          <label class="label">Password</label>
+          <div class="password-wrapper">
+            <input class="input" id="loginPass" type="password" autocomplete="current-password" required />
+            <button type="button" class="password-toggle" id="loginPassEye" aria-label="Show password" onclick="toggleAdminPassword('loginPass','loginPassEye')">👁</button>
+          </div>
+        </div>
+        <div class="form-feedback" id="loginFeedback" role="status"></div>
+        <div class="form-actions">
+          <button class="btn" type="button" id="loginSubmitBtn" style="width:100%;" onclick="submitAdminLogin()">Login</button>
+        </div>
+        <button type="button" class="link login-unlock" id="loginUnlockBtn" onclick="clearLoginAttempts(); const f=document.getElementById('loginFeedback'); if(f) f.textContent='Login lock cleared. Try again.';">Unlock after failed attempts</button>
+      </form>
+      <div class="hint" style="text-align:center;margin-top:16px;">
+        <a class="link" href="../index.html" style="justify-content:center;">← Back to store</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="adminToast" role="status"></div>
+  <script src="/js/ar-store-sync.js?v=5"></script>
+  <script src="./admin.js?v=9"></script>
+  <script src="./login.js?v=4"></script>
+</body>
+</html>

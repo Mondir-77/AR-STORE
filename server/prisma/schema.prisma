@@ -1,0 +1,109 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id           String        @id @default(cuid()) @map("_id")
+  email        String        @unique
+  passwordHash String
+  fullName     String
+  avatarUrl    String?
+  role         Role          @default(USER)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  orders       Order[]
+  conversation Conversation?
+}
+
+model Product {
+  id          String      @id @default(cuid()) @map("_id")
+  name        String
+  nameEn      String      @default("")
+  nameFr      String      @default("")
+  description String      @default("")
+  price       Float
+  costPrice   Float       @default(0)
+  categoryId  Int         @default(1)
+  imageUrl    String
+  imageUrls   String      @default("[]")
+  videoUrl    String      @default("")
+  stockMax    Int         @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  orderItems  OrderItem[]
+}
+
+model Order {
+  id            String      @id @default(cuid()) @map("_id")
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status        String      @default("pending")
+  paymentMethod String      @default("online")
+  channel       String      @default("")
+  note          String      @default("")
+  customerName  String?
+  customerPhone String?
+  customerCity  String?
+  totalRevenue  Float       @default(0)
+  totalCost     Float       @default(0)
+  totalProfit   Float       @default(0)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  items         OrderItem[]
+}
+
+model OrderItem {
+  id        String  @id @default(cuid()) @map("_id")
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  qty       Int
+  unitPrice Float
+  unitCost  Float   @default(0)
+}
+
+model Conversation {
+  id        String    @id @default(cuid()) @map("_id")
+  userId    String    @unique
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages  Message[]
+  updatedAt DateTime  @updatedAt
+}
+
+model Message {
+  id             String       @id @default(cuid()) @map("_id")
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  fromRole       String
+  fromUserId     String?
+  body           String
+  createdAt      DateTime     @default(now())
+}
+
+/// Optional rollup snapshots (can be populated by cron); analytics also compute live from Order.
+model ProfitSnapshot {
+  id        String   @id @default(cuid()) @map("_id")
+  day       DateTime
+  revenue   Float    @default(0)
+  cost      Float    @default(0)
+  profit    Float    @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([day])
+}
+
+model StoreSetting {
+  key   String @id @map("_id")
+  value String
+}
