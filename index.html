@@ -1126,7 +1126,13 @@ footer .footer-secret:active{
   border:1px solid rgba(255,255,255,0.14);
 }
 .search-item-info{min-width:0;flex:1;}
-.search-item-name{font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.search-item-name{
+  font-weight:900;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  color:#fff;
+}
 .search-item-price{margin-top:4px;color:rgba(255,255,255,0.80);font-weight:800;font-size:13px;}
 .search-item-action{
   font-weight:900;
@@ -1457,6 +1463,11 @@ footer .footer-secret:active{
   border:1px solid rgba(255,255,255,0.16);
   background:rgba(255,255,255,0.08);color:#fff;
   font-weight:700;font-size:13px;
+  color-scheme: dark;
+}
+.products-sort option{
+  color:#1a1a1a;
+  background:#fff;
 }
 .compare-modal-content{max-height:90vh;overflow:auto;text-align:left;padding:28px 24px;}
 .compare-modal-content h2{
@@ -2934,7 +2945,7 @@ input:focus, textarea:focus, button:focus-visible {
 <body>
 
 <!-- Firebase (compat) -->
-<script src="/js/ar-store-sync.js?v=6"></script>
+<script src="/js/ar-store-sync.js?v=7"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>

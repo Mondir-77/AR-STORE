@@ -430,6 +430,11 @@
       body: JSON.stringify({ dataUrl }),
       auth: "admin"
     });
+    if (data.storage === "local") {
+      console.warn(
+        "AR STORE: upload saved to temporary server disk. Set CLOUDINARY_URL on Render for persistent images."
+      );
+    }
     return data.url;
   }
 

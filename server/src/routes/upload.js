@@ -1,33 +1,11 @@
 import { Router } from "express";
-import fs from "fs/promises";
-import path from "path";
-import { fileURLToPath } from "url";
 import { authMiddleware, requireAuth } from "../middleware/auth.js";
 import { requireAdmin } from "../middleware/requireAdmin.js";
 import { log } from "../lib/logger.js";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const UPLOADS_DIR = path.join(__dirname, "..", "..", "uploads");
+import { uploadMediaBuffer, mediaStorageLabel } from "../lib/mediaUpload.js";
 
 export const uploadRouter = Router();
 uploadRouter.use(authMiddleware);
-
-async function ensureUploadsDir() {
-  await fs.mkdir(UPLOADS_DIR, { recursive: true });
-}
-
-function extFromMime(mime) {
-  const map = {
-    "image/jpeg": ".jpg",
-    "image/png": ".png",
-    "image/webp": ".webp",
-    "image/gif": ".gif",
-    "video/mp4": ".mp4",
-    "video/webm": ".webm",
-    "video/quicktime": ".mov"
-  };
-  return map[mime] || (mime.startsWith("video/") ? ".mp4" : ".jpg");
-}
 
 uploadRouter.post("/", requireAuth, requireAdmin, async (req, res) => {
   try {
@@ -43,14 +21,11 @@ uploadRouter.post("/", requireAuth, requireAdmin, async (req, res) => {
     if (buf.length > maxBytes) {
       return res.status(400).json({ error: isVideo ? "Video too large (max 50MB)" : "Image too large (max 8MB)" });
     }
-    await ensureUploadsDir();
-    const prefix = isVideo ? "vid_" : "img_";
-    const name = `${prefix}${Date.now()}_${Math.random().toString(16).slice(2, 8)}${extFromMime(mime)}`;
-    await fs.writeFile(path.join(UPLOADS_DIR, name), buf);
-    const url = `/uploads/${name}`;
+    const url = await uploadMediaBuffer(buf, { mime, isVideo });
     const kb = Math.round(buf.length / 1024);
-    log.upload(isVideo ? "Video uploaded" : "Image uploaded", `${url} · ${kb} KB · ${mime}`);
-    res.json({ url });
+    const storage = mediaStorageLabel();
+    log.upload(isVideo ? "Video uploaded" : "Image uploaded", `${url} · ${kb} KB · ${mime} · ${storage}`);
+    res.json({ url, storage });
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: "Upload failed" });

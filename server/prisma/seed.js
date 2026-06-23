@@ -30,7 +30,7 @@ async function main() {
   await prisma.user.upsert({
     where: { email: adminEmail },
     create: { email: adminEmail, passwordHash: hash, fullName: "Mondir AR", role: "ADMIN" },
-    update: { passwordHash: hash, role: "ADMIN", fullName: "Mondir AR" }
+    update: { role: "ADMIN", fullName: "Mondir AR" }
   });
 
   const guestHash = await bcrypt.hash("guest-not-used", 10);
