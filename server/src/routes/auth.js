@@ -25,7 +25,14 @@ authRouter.post("/register", async (req, res) => {
     log.auth("User registered", `${email} · ${clientIp(req)}`);
     return res.json({
       token,
-      user: { id: user.id, email: user.email, fullName: user.fullName, avatarUrl: user.avatarUrl, role: user.role }
+      user: {
+        id: user.id,
+        email: user.email,
+        fullName: user.fullName,
+        avatarUrl: user.avatarUrl,
+        role: user.role,
+        createdAt: user.createdAt
+      }
     });
   } catch (e) {
     console.error(e);

@@ -42,6 +42,34 @@
     return "admin@arstore.local";
   }
 
+  const ACCOUNTS_KEY = "arStoreAccounts";
+
+  function readLocalAccounts() {
+    try {
+      const rows = JSON.parse(localStorage.getItem(ACCOUNTS_KEY) || "[]");
+      return Array.isArray(rows) ? rows : [];
+    } catch (_e) {
+      return [];
+    }
+  }
+
+  function upsertLocalAccount({ name, email, createdAt, source, avatar }) {
+    const em = String(email || "").trim().toLowerCase();
+    if (!em) return;
+    const accounts = readLocalAccounts();
+    const idx = accounts.findIndex((a) => String(a?.email || "").toLowerCase() === em);
+    const entry = {
+      name: String(name || em).trim() || em,
+      email: em,
+      createdAt: createdAt || new Date().toISOString(),
+      source: source || "server"
+    };
+    if (avatar) entry.avatar = avatar;
+    if (idx >= 0) accounts[idx] = { ...accounts[idx], ...entry };
+    else accounts.push(entry);
+    localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+  }
+
   async function registerUser(fullName, email, password) {
     const data = await api("/api/auth/register", {
       method: "POST",
@@ -49,6 +77,15 @@
       auth: "none"
     });
     if (data.token) setToken(data.token);
+    if (data.user?.email) {
+      upsertLocalAccount({
+        name: data.user.fullName || fullName,
+        email: data.user.email,
+        createdAt: data.user.createdAt,
+        avatar: data.user.avatarUrl || undefined,
+        source: "server"
+      });
+    }
     return data;
   }
 
@@ -677,6 +714,7 @@
     loginAdmin,
     registerUser,
     loginUser,
+    upsertLocalAccount,
     fetchCatalog,
     fetchSettings,
     fetchProducts,

@@ -209,9 +209,57 @@ async function refreshOrdersFromServer(){
   }
 }
 
+function getLocalCustomerAccounts(){
+  const acc = readLS(KEYS.accounts, []);
+  return Array.isArray(acc) ? acc : [];
+}
+
+function normalizeCustomerRow(u){
+  return {
+    name: u?.name || u?.fullName || u?.email || "—",
+    email: String(u?.email || "").toLowerCase(),
+    createdAt: u?.createdAt || null,
+    orderCount: Number(u?.orderCount || u?._count?.orders || 0) || 0,
+    source: u?.source || (u?.passwordHash ? "local" : "server"),
+    ...(u?.passwordHash ? { passwordHash: u.passwordHash } : {}),
+    ...(u?.avatar ? { avatar: u.avatar } : {})
+  };
+}
+
+function mergeCustomerLists(localRows, serverRows){
+  const merged = new Map();
+  [...(localRows || []), ...(serverRows || [])].forEach(u=>{
+    const row = normalizeCustomerRow(u);
+    if(!row.email) return;
+    const prev = merged.get(row.email) || {};
+    merged.set(row.email, {...prev, ...row, email: row.email});
+  });
+  return [...merged.values()];
+}
+
+function syncServerCustomersToLocal(serverRows){
+  if(!Array.isArray(serverRows) || !serverRows.length) return;
+  const merged = mergeCustomerLists(getLocalCustomerAccounts(), serverRows);
+  writeLS(KEYS.accounts, merged.map(u=>({
+    name: u.name,
+    email: u.email,
+    createdAt: u.createdAt || null,
+    source: u.source || "server",
+    ...(u.passwordHash ? { passwordHash: u.passwordHash } : {}),
+    ...(u.avatar ? { avatar: u.avatar } : {})
+  })));
+}
+
 async function refreshCustomersFromServer(){
-  if(!canUseServer() || !window.ARStoreSync) return false;
+  if(!window.ARStoreSync) return false;
   try{
+    const serverUp = await ARStoreSync.pingServer();
+    if(!serverUp) return false;
+    let ready = canUseServer();
+    if(!ready && typeof ARStoreSync.ensureAdminSession === "function"){
+      ready = await ARStoreSync.ensureAdminSession();
+    }
+    if(!ready) return false;
     const rows = await ARStoreSync.fetchAdminUsers();
     customersCache = (Array.isArray(rows) ? rows : [])
       .filter(u=> String(u?.role||"").toUpperCase() !== "ADMIN")
@@ -222,6 +270,7 @@ async function refreshCustomersFromServer(){
         orderCount: u._count?.orders || 0,
         source: "server"
       }));
+    syncServerCustomersToLocal(customersCache);
     return true;
   }catch(e){
     console.warn("Customers sync failed:", e.message);
@@ -230,9 +279,9 @@ async function refreshCustomersFromServer(){
 }
 
 function getCustomers(){
-  if(customersCache) return customersCache;
-  const acc = readLS(KEYS.accounts, []);
-  return Array.isArray(acc) ? acc : [];
+  const local = getLocalCustomerAccounts();
+  const server = customersCache !== null ? customersCache : [];
+  return mergeCustomerLists(local, server);
 }
 
 function getSettings(){
@@ -2303,15 +2352,7 @@ function resetProductForm(){
 
 function renderUsers(){
   const q = String(el("usersSearch")?.value || "").trim().toLowerCase();
-  const local = readLS(KEYS.accounts, []);
-  const server = customersCache || [];
-  const merged = new Map();
-  [...local, ...server].forEach(u=>{
-    const email = String(u?.email||"").toLowerCase();
-    if(!email) return;
-    merged.set(email, {...merged.get(email), ...u});
-  });
-  const users = [...merged.values()].filter(u=>{
+  const users = getCustomers().filter(u=>{
     if(!q) return true;
     return String(u?.name||"").toLowerCase().includes(q) || String(u?.email||"").toLowerCase().includes(q);
   });
@@ -2497,14 +2538,18 @@ function mountApp(session){
         renderOverview();
         if(document.getElementById("page-orders")?.classList.contains("active")) renderOrders();
       });
-      refreshCustomersFromServer().then(()=>{
-        if(document.getElementById("page-users")?.classList.contains("active")) renderUsers();
-      });
     }else{
       productsView = "catalogues";
       renderProductsPage();
       renderOverview();
     }
+    ARStoreSync.pingServer().then((up)=>{
+      if(!up) return false;
+      return refreshCustomersFromServer();
+    }).finally(()=>{
+      renderOverview();
+      if(document.getElementById("page-users")?.classList.contains("active")) renderUsers();
+    });
     ARStoreSync.initLiveSync({
       onCatalog(){
         if(!ARStoreSync.canUseAdminServer()) return;

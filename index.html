@@ -2934,7 +2934,7 @@ input:focus, textarea:focus, button:focus-visible {
 <body>
 
 <!-- Firebase (compat) -->
-<script src="/js/ar-store-sync.js?v=5"></script>
+<script src="/js/ar-store-sync.js?v=6"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
@@ -3922,7 +3922,7 @@ async function createLocalAccount(name, email, pass){
     return { ok: false, reason: "duplicate" };
   }
   const passwordHash = await hashPassword(pass);
-  accounts.push({ name, email, passwordHash, avatar: userProfile.avatar || "gust.png" });
+  accounts.push({ name, email, passwordHash, avatar: userProfile.avatar || "gust.png", createdAt: new Date().toISOString(), source: "local" });
   setAccounts(accounts);
   userProfile.username = name;
   userProfile.avatar = userProfile.avatar || "gust.png";
